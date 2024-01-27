@@ -20,4 +20,8 @@
     <ProjectReference Include="..\Clinical.Interface\Clinical.Interface.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="UseCases\Analysis\Commands\" />
+  </ItemGroup>
+
 </Project>
