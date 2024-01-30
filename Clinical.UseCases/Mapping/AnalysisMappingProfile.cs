@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Clinical.Application.DTOS.Analysis.Response;
 using Clinical.Domain.Entities;
+using Clinical.UseCases.UseCases.Analysis.Commands.CreateCommand;
 
 namespace Clinical.UseCases.Mapping
 {
@@ -15,6 +16,8 @@ namespace Clinical.UseCases.Mapping
 
             CreateMap<Analysis, GetAnalysisByIdResponseDto>()
             .ReverseMap();
+
+            CreateMap<CreateAnalysisCommand, Analysis>();
         }
     }
 }

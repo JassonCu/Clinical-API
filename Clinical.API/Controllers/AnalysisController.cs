@@ -1,4 +1,5 @@
-﻿using Clinical.UseCases.UseCases.Analysis.Queries.GetAllQuery;
+﻿using Clinical.UseCases.UseCases.Analysis.Commands.CreateCommand;
+using Clinical.UseCases.UseCases.Analysis.Queries.GetAllQuery;
 using Clinical.UseCases.UseCases.Analysis.Queries.GetByIdQuery;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -32,5 +33,12 @@ namespace Clinical.API.Controllers
             return Ok(response);
         }
 
+        [HttpPost("Register")]
+        public async Task<IActionResult> RegisterAnalysis([FromBody] CreateAnalysisCommand command)
+        {
+            var response = await _mediator.Send(command);
+
+            return Ok(response);
+        }
     }
 }
