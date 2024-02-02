@@ -8,6 +8,7 @@ namespace Clinical.Interface
         Task<Analysis> AnalysisById(int analysisId);
         Task<bool> AnalysisRegister(Analysis analysis);
         Task<bool> AnalysisEdit(Analysis analysis);
+        Task<bool> AnalysisRemove(int analysisId);
     }
 
 }
