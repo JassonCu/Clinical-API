@@ -63,6 +63,20 @@ namespace Clinical.Persistence.Repositories
             return recordAffected > 0;
         }
 
+        public async Task<bool> AnalysisRemove(int analysisId)
+        {
+            using var connection = _context.CreateConnection;
+            var query = "uspAnalysisRemove";
+            
+            var parameters = new DynamicParameters();
+            parameters.Add("AnalysisId", analysisId);
+
+            var recordAffected = await connection
+                .ExecuteAsync(query, param: parameters, commandType: CommandType.StoredProcedure);
+
+            return recordAffected > 0;
+        }
+
         public async Task<IEnumerable<Analysis>> ListAnalysis()
         {
             using var connection = _context.CreateConnection;
