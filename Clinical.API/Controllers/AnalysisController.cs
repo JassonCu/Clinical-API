@@ -1,8 +1,8 @@
 ﻿using Clinical.UseCases.UseCases.Analysis.Commands.CreateCommand;
+using Clinical.UseCases.UseCases.Analysis.Commands.UpdateCommand;
 using Clinical.UseCases.UseCases.Analysis.Queries.GetAllQuery;
 using Clinical.UseCases.UseCases.Analysis.Queries.GetByIdQuery;
 using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clinical.API.Controllers
@@ -38,6 +38,14 @@ namespace Clinical.API.Controllers
         {
             var response = await _mediator.Send(command);
 
+            return Ok(response);
+        }
+
+        [HttpPut("Edit")]
+        public async Task<IActionResult> EditAnalysis([FromBody] UpdateAnalysisCommand command)
+        {
+            var response = await _mediator.Send(command);
+            
             return Ok(response);
         }
     }
