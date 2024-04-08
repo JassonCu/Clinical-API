@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using AutoMapper;
 using Clinical.Application.DTOS.Analysis.Response;
-using Clinical.Interface;
+using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
 using MediatR;
 

@@ -1,4 +1,4 @@
-﻿using Clinical.Interface;
+﻿using Clinical.Interface.Interfaces;
 using Clinical.Persistence.Context;
 using Clinical.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
