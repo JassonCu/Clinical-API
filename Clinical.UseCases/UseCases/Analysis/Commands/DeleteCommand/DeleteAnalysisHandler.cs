@@ -1,4 +1,4 @@
-﻿using Clinical.Interface;
+﻿using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
 using MediatR;
 

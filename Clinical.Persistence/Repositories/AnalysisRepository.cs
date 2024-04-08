@@ -1,6 +1,6 @@
 ﻿using System.Data;
 using Clinical.Domain.Entities;
-using Clinical.Interface;
+using Clinical.Interface.Interfaces;
 using Clinical.Persistence.Context;
 using Dapper;
 

@@ -1,6 +1,6 @@
 ﻿using Clinical.Domain.Entities;
 
-namespace Clinical.Interface
+namespace Clinical.Interface.Interfaces
 {
     public interface IAnalysisRepository
     {
