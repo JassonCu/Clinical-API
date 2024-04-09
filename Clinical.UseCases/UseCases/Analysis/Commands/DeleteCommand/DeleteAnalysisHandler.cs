@@ -6,13 +6,11 @@ namespace Clinical.UseCases.UseCases.Analysis.Commands.DeleteCommand
 {
     public class DeleteAnalysisHandler : IRequestHandler<DeleteAnalysisCommand, BaseResponse<bool>>
     {
-        //private readonly IAnalysisRepository _analysisRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public DeleteAnalysisHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            // _analysisRepository = analysisRepository;
         }
 
         public async Task<BaseResponse<bool>> Handle(DeleteAnalysisCommand request, CancellationToken cancellationToken)

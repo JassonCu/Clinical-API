@@ -8,13 +8,11 @@ namespace Clinical.UseCases.UseCases.Analysis.Commands.CreateCommand
 {
     public class CreateAnalysisHandler : IRequestHandler<CreateAnalysisCommand, BaseResponse<bool>>
     {
-        // private readonly IAnalysisRepository _analysisRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public CreateAnalysisHandler(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            // _analysisRepository = analysisRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
