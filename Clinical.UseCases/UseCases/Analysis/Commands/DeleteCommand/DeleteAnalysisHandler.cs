@@ -6,11 +6,13 @@ namespace Clinical.UseCases.UseCases.Analysis.Commands.DeleteCommand
 {
     public class DeleteAnalysisHandler : IRequestHandler<DeleteAnalysisCommand, BaseResponse<bool>>
     {
-        private readonly IAnalysisRepository _analysisRepository;
+        //private readonly IAnalysisRepository _analysisRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public DeleteAnalysisHandler(IAnalysisRepository analysisRepository)
+        public DeleteAnalysisHandler(IUnitOfWork unitOfWork)
         {
-            _analysisRepository = analysisRepository;
+            _unitOfWork = unitOfWork;
+            // _analysisRepository = analysisRepository;
         }
 
         public async Task<BaseResponse<bool>> Handle(DeleteAnalysisCommand request, CancellationToken cancellationToken)
@@ -19,7 +21,7 @@ namespace Clinical.UseCases.UseCases.Analysis.Commands.DeleteCommand
 
             try
             {
-                response.Data = await _analysisRepository.AnalysisRemove(request.AnalysisId);
+                response.Data = await _unitOfWork.Analysis.ExecAsync("uspAnalysisRemove", new { request.AnalysisId });
 
                 if (response.Data)
                 {
