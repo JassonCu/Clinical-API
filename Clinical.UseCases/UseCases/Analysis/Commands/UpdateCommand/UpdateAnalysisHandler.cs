@@ -8,7 +8,6 @@ namespace Clinical.UseCases.UseCases.Analysis.Commands.UpdateCommand
 {
     public class UpdateAnalysisHandler : IRequestHandler<UpdateAnalysisCommand, BaseResponse<bool>>
     {
-        // private readonly IAnalysisRepository _analysisRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
@@ -16,7 +15,6 @@ namespace Clinical.UseCases.UseCases.Analysis.Commands.UpdateCommand
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
-            //_analysisRepository = analysisRepository;
         }
 
         public async Task<BaseResponse<bool>> Handle(UpdateAnalysisCommand request, CancellationToken cancellationToken)

@@ -8,13 +8,11 @@ namespace Clinical.UseCases.UseCases.Analysis.Queries.GetByIdQuery
 {
     public class GetAnalysisByIdHandler : IRequestHandler<GetAnalysisByIdQuery, BaseResponse<GetAnalysisByIdResponseDto>>
     {
-        //private readonly IAnalysisRepository _analysisRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public GetAnalysisByIdHandler(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            //_analysisRepository = analysisRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }

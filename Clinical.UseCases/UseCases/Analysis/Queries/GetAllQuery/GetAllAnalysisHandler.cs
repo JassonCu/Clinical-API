@@ -8,7 +8,6 @@ namespace Clinical.UseCases.UseCases.Analysis.Queries.GetAllQuery
 {
     public class GetAllAnalysisHandler : IRequestHandler<GetAllAnalysisQuery, BaseResponse<IEnumerable<GetAnalysisResponseDto>>>
     {
-        // private readonly IAnalysisRepository _analysisRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
