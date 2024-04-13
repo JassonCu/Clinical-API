@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Clinical.Application.DTOS.Analysis.Response;
 using Clinical.Domain.Entities;
+using Clinical.UseCases.UseCases.Analysis.Commands.ChangeStateCommand;
 using Clinical.UseCases.UseCases.Analysis.Commands.CreateCommand;
 using Clinical.UseCases.UseCases.Analysis.Commands.UpdateCommand;
 
@@ -21,6 +22,7 @@ namespace Clinical.UseCases.Mapping
             CreateMap<CreateAnalysisCommand, Analysis>();
 
             CreateMap<UpdateAnalysisCommand, Analysis>();
+            CreateMap<ChangeStateAnalysisCommand, Analysis>();
         }
     }
 }
