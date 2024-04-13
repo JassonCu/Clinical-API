@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Clinical.Interface;
+using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
 using MediatR;
 using Entity = Clinical.Domain.Entities;
@@ -8,13 +8,13 @@ namespace Clinical.UseCases.UseCases.Analysis.Commands.UpdateCommand
 {
     public class UpdateAnalysisHandler : IRequestHandler<UpdateAnalysisCommand, BaseResponse<bool>>
     {
-        private readonly IAnalysisRepository _analysisRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public UpdateAnalysisHandler(IMapper mapper, IAnalysisRepository analysisRepository)
+        public UpdateAnalysisHandler(IMapper mapper, IUnitOfWork unitOfWork)
         {
             _mapper = mapper;
-            _analysisRepository = analysisRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<BaseResponse<bool>> Handle(UpdateAnalysisCommand request, CancellationToken cancellationToken)
@@ -24,7 +24,8 @@ namespace Clinical.UseCases.UseCases.Analysis.Commands.UpdateCommand
             try
             {
                 var analysis = _mapper.Map<Entity.Analysis>(request);
-                response.Data = await _analysisRepository.AnalysisEdit(analysis);
+                var parameters = new { analysis.AnalysisId, analysis.Name };
+                response.Data = await _unitOfWork.Analysis.ExecAsync("uspAnalysisEdit", parameters);
 
                 if (response.Data)
                 {

@@ -1,4 +1,4 @@
-﻿using Clinical.Interface;
+﻿using Clinical.Interface.Interfaces;
 using Clinical.Persistence.Context;
 using Clinical.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +10,8 @@ namespace Clinical.Persistence.Extensions
         public static IServiceCollection AddInyectionPersistence(this IServiceCollection services)
         {
             services.AddSingleton<ApplicationDBContext>();
-            services.AddScoped<IAnalysisRepository, AnalysisRepository>();
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
 
             return services;
         }

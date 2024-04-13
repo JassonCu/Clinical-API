@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Clinical.Application.DTOS.Analysis.Response;
-using Clinical.Interface;
+using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
 using MediatR;
 
@@ -8,12 +8,12 @@ namespace Clinical.UseCases.UseCases.Analysis.Queries.GetAllQuery
 {
     public class GetAllAnalysisHandler : IRequestHandler<GetAllAnalysisQuery, BaseResponse<IEnumerable<GetAnalysisResponseDto>>>
     {
-        private readonly IAnalysisRepository _analysisRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public GetAllAnalysisHandler(IAnalysisRepository analysisRepository, IMapper mapper)
+        public GetAllAnalysisHandler(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _analysisRepository = analysisRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
@@ -23,7 +23,7 @@ namespace Clinical.UseCases.UseCases.Analysis.Queries.GetAllQuery
 
             try
             {
-                var analysis = await _analysisRepository.ListAnalysis();
+                var analysis = await _unitOfWork.Analysis.GetAllAsync("uspAnalysisList");
 
                 if (analysis is not null)
                 {
