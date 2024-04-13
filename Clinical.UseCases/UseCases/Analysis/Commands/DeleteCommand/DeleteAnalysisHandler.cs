@@ -1,5 +1,6 @@
 ﻿using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
+using Clinical.Utils.Constants;
 using MediatR;
 
 namespace Clinical.UseCases.UseCases.Analysis.Commands.DeleteCommand
@@ -19,7 +20,7 @@ namespace Clinical.UseCases.UseCases.Analysis.Commands.DeleteCommand
 
             try
             {
-                response.Data = await _unitOfWork.Analysis.ExecAsync("uspAnalysisRemove", new { request.AnalysisId });
+                response.Data = await _unitOfWork.Analysis.ExecAsync(StoreProcedures.uspAnalysisRemove, request);
 
                 if (response.Data)
                 {

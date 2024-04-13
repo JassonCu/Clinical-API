@@ -2,6 +2,7 @@
 using Clinical.Application.DTOS.Analysis.Response;
 using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
+using Clinical.Utils.Constants;
 using MediatR;
 
 namespace Clinical.UseCases.UseCases.Analysis.Queries.GetByIdQuery
@@ -23,7 +24,7 @@ namespace Clinical.UseCases.UseCases.Analysis.Queries.GetByIdQuery
 
             try
             {
-                var analysis = await _unitOfWork.Analysis.GetByIdAsync("uspAnalysisById", new { request.AnalysisId });
+                var analysis = await _unitOfWork.Analysis.GetByIdAsync(StoreProcedures.uspAnalysisById, request);
 
                 if (analysis is null)
                 {
