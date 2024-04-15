@@ -2,6 +2,7 @@
 using Clinical.Application.DTOS.Analysis.Response;
 using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
+using Clinical.Utils.Constants;
 using MediatR;
 
 namespace Clinical.UseCases.UseCases.Analysis.Queries.GetAllQuery
@@ -23,7 +24,7 @@ namespace Clinical.UseCases.UseCases.Analysis.Queries.GetAllQuery
 
             try
             {
-                var analysis = await _unitOfWork.Analysis.GetAllAsync("uspAnalysisList");
+                var analysis = await _unitOfWork.Analysis.GetAllAsync(StoreProcedures.uspAnalysisList);
 
                 if (analysis is not null)
                 {
@@ -36,7 +37,6 @@ namespace Clinical.UseCases.UseCases.Analysis.Queries.GetAllQuery
 
             catch (Exception ex)
             {
-
                 response.Message = ex.Message;
             }
             return response;

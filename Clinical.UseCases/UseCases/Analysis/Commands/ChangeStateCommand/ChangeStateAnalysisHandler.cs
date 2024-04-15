@@ -3,6 +3,8 @@ using Entity = Clinical.Domain.Entities;
 using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
 using MediatR;
+using Clinical.Utils.Constants;
+using Clinical.Utils.HelperExtensions;
 
 namespace Clinical.UseCases.UseCases.Analysis.Commands.ChangeStateCommand
 {
@@ -24,8 +26,8 @@ namespace Clinical.UseCases.UseCases.Analysis.Commands.ChangeStateCommand
             try
             {
                 var analysis = _mapper.Map<Entity.Analysis>(request);
-                var parameters = new { analysis.AnalysisId, analysis.State };
-                response.Data = await _unitOfWork.Analysis.ExecAsync("uspAnalysisChangeState", parameters);
+                var parameters = analysis.GetPropertiesWithValues();
+                response.Data = await _unitOfWork.Analysis.ExecAsync(StoreProcedures.uspAnalysisChangeState, parameters);
 
                 if(response.Data)
                 {
