@@ -65,9 +65,3 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
-
-    # Paso adicional para generar informe de cobertura
-    - name: Generate code coverage report
-      run: |
-        dotnet tool install -g dotnet-reportgenerator-globaltool
-        reportgenerator -reports:**/coverage.opencover.xml -targetdir:coveragereport -reporttypes:Html;Cobertura
