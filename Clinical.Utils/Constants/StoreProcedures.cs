@@ -9,6 +9,10 @@
         public const string uspAnalysisEdit = "uspAnalysisEdit";
         public const string uspAnalysisList = "uspAnalysisList";
         public const string uspAnalysisById = "uspAnalysisById";
-        #endregion 
+        #endregion
+
+        #region Exam Store Procedures
+        public const string uspExamList = "uspExamList";
+        #endregion
     }
 }
