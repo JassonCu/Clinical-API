@@ -12,7 +12,8 @@ namespace Clinical.Persistence.Extensions
             services.AddSingleton<ApplicationDBContext>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddTransient<IUnitOfWork, UnitOfWork>();
-
+            services.AddTransient<IExamRepository, ExamRepository>();
+            
             return services;
         }
     }
