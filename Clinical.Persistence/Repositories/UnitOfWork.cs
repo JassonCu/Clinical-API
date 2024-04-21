@@ -7,9 +7,12 @@ namespace Clinical.Persistence.Repositories
     {
         public IGenericRepository<Analysis> Analysis { get; }
 
-        public UnitOfWork(IGenericRepository<Analysis> analysis)
+        public IGenericRepository<Exam> Exam { get; }
+
+        public UnitOfWork(IGenericRepository<Analysis> analysis, IGenericRepository<Exam> exam)
         {
             Analysis = analysis;
+            Exam = exam;
         }
 
         public void Dispose()
