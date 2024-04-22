@@ -16,8 +16,10 @@ namespace Clinical.Test
         {
             // Arrange
             var mediatorMock = new Mock<IMediator>();
-            var response = new BaseResponse<IEnumerable<GetAllExamResponseDto>>();
-            response.Data = new List<GetAllExamResponseDto>();
+            var response = new BaseResponse<IEnumerable<GetAllExamResponseDto>>
+            {
+                Data = new List<GetAllExamResponseDto>()
+            };
 
             mediatorMock.Setup(m => m.Send(It.IsAny<GetAllExamQuery>(), default))
                         .ReturnsAsync(response);
