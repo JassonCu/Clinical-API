@@ -14,6 +14,6 @@
         public const string MESSAGE_TOKEN_ERROR = "El usuario y/o contraseña es incorrecta, compruébala.";
         public const string MESSAGE_VALIDATE = "Errores de validación.";
         public const string MESSAGE_FAILED = "Operación fallida.";
-        public const string MESSAGE_EXCEPTION = "Hubo un error inesperado, comunicarse con el administrador (jasson14@hotmail.com).";
+        public const string MESSAGE_EXCEPTION = "Hubo un error inesperado, comunicarse con el administrador (jassoncucaal14@hotmail.com).";
     }
 }
