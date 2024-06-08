@@ -13,21 +13,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Service", "Service", "{7BEC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{0FCE67D9-CB3D-4806-A303-63F5A132708E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clinical.Domain", "Clinical.Domain\Clinical.Domain.csproj", "{ADAD207D-6FCE-4BDF-92A7-D2EE6354C082}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clinical.Domain", "Clinical.Domain\Clinical.Domain.csproj", "{ADAD207D-6FCE-4BDF-92A7-D2EE6354C082}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clinical.Infraestructure", "Clinical.Infraestructure\Clinical.Infraestructure.csproj", "{246EB4DF-FC3B-4281-8F75-E0F05CA1DCEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clinical.Infraestructure", "Clinical.Infraestructure\Clinical.Infraestructure.csproj", "{246EB4DF-FC3B-4281-8F75-E0F05CA1DCEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clinical.Persistence", "Clinical.Persistence\Clinical.Persistence.csproj", "{13237839-16A8-4F03-A809-1BEE2297593D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clinical.Persistence", "Clinical.Persistence\Clinical.Persistence.csproj", "{13237839-16A8-4F03-A809-1BEE2297593D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clinical.Application.DTOS", "Clinical.Application.DTOS\Clinical.Application.DTOS.csproj", "{7AAF29D5-3281-4425-9105-66B21DC0E905}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clinical.Application.DTOS", "Clinical.Application.DTOS\Clinical.Application.DTOS.csproj", "{7AAF29D5-3281-4425-9105-66B21DC0E905}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clinical.Interface", "Clinical.Interface\Clinical.Interface.csproj", "{6A33BD26-E7FE-408C-ABBA-504CFEC780BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clinical.Interface", "Clinical.Interface\Clinical.Interface.csproj", "{6A33BD26-E7FE-408C-ABBA-504CFEC780BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clinical.UseCases", "Clinical.UseCases\Clinical.UseCases.csproj", "{6FE70319-5D32-4B7C-A3F4-4FCC499B1FD5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clinical.UseCases", "Clinical.UseCases\Clinical.UseCases.csproj", "{6FE70319-5D32-4B7C-A3F4-4FCC499B1FD5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clinical.API", "Clinical.API\Clinical.API.csproj", "{6292C108-8B0F-4B9E-90A7-7A970EB47E66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clinical.API", "Clinical.API\Clinical.API.csproj", "{6292C108-8B0F-4B9E-90A7-7A970EB47E66}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clinical.Utils", "Clinical.Utils\Clinical.Utils.csproj", "{D051B666-D0A0-4BF0-8D94-DA157C3F2C5D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clinical.Utils", "Clinical.Utils\Clinical.Utils.csproj", "{D051B666-D0A0-4BF0-8D94-DA157C3F2C5D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{187E9C6F-ED40-4863-890B-B3031DFB507F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clinical.Tests", "Clinical.Tests\Clinical.Tests.csproj", "{AEBC8E28-8DBF-4F2B-8819-CF12546AF1F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,6 +71,10 @@ Global
 		{D051B666-D0A0-4BF0-8D94-DA157C3F2C5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D051B666-D0A0-4BF0-8D94-DA157C3F2C5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D051B666-D0A0-4BF0-8D94-DA157C3F2C5D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEBC8E28-8DBF-4F2B-8819-CF12546AF1F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEBC8E28-8DBF-4F2B-8819-CF12546AF1F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEBC8E28-8DBF-4F2B-8819-CF12546AF1F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEBC8E28-8DBF-4F2B-8819-CF12546AF1F9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,6 +88,7 @@ Global
 		{6FE70319-5D32-4B7C-A3F4-4FCC499B1FD5} = {E461F857-9687-43CA-A123-AF33734EC898}
 		{6292C108-8B0F-4B9E-90A7-7A970EB47E66} = {7BEC2360-FB8B-472A-B8FE-ED79BA75A094}
 		{D051B666-D0A0-4BF0-8D94-DA157C3F2C5D} = {0FCE67D9-CB3D-4806-A303-63F5A132708E}
+		{AEBC8E28-8DBF-4F2B-8819-CF12546AF1F9} = {187E9C6F-ED40-4863-890B-B3031DFB507F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {019A404C-9FD2-4DBB-BCDC-8CF170C227EF}
