@@ -22,15 +22,13 @@ namespace Clinical.UseCases.UseCases.PatientAllergy.Commands.CreateCommand
         public async Task<BaseResponse<bool>> Handle(CreateAllergyCommand request, CancellationToken cancellationToken)
         {
             var response = new BaseResponse<bool>();
-            try
-            {
-                var entity = _mapper.Map<Entity.PatientAllergy>(request);
-                entity.State = 1;
-                var parameters = entity.GetPropertiesWithValues();
-                response.Data = await _unitOfWork.PatientAllergy.ExecAsync(StoreProcedures.uspAllergyRegister, parameters);
-                if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_SAVE; }
-            }
-            catch (Exception ex) { response.Message = ex.Message; }
+
+            var entity = _mapper.Map<Entity.PatientAllergy>(request);
+            entity.State = 1;
+            var parameters = entity.GetPropertiesWithValues();
+            response.Data = await _unitOfWork.PatientAllergy.ExecAsync(StoreProcedures.uspAllergyRegister, parameters);
+            if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_SAVE; }
+
             return response;
         }
     }

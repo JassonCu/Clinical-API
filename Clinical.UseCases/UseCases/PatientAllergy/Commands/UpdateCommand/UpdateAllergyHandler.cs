@@ -22,14 +22,12 @@ namespace Clinical.UseCases.UseCases.PatientAllergy.Commands.UpdateCommand
         public async Task<BaseResponse<bool>> Handle(UpdateAllergyCommand request, CancellationToken cancellationToken)
         {
             var response = new BaseResponse<bool>();
-            try
-            {
-                var entity = _mapper.Map<Entity.PatientAllergy>(request);
-                var parameters = entity.GetPropertiesWithValues();
-                response.Data = await _unitOfWork.PatientAllergy.ExecAsync(StoreProcedures.uspAllergyEdit, parameters);
-                if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_UPDATE; }
-            }
-            catch (Exception ex) { response.Message = ex.Message; }
+
+            var entity = _mapper.Map<Entity.PatientAllergy>(request);
+            var parameters = entity.GetPropertiesWithValues();
+            response.Data = await _unitOfWork.PatientAllergy.ExecAsync(StoreProcedures.uspAllergyEdit, parameters);
+            if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_UPDATE; }
+
             return response;
         }
     }

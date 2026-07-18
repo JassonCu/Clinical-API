@@ -18,19 +18,12 @@ public class DeleteAppointmentHandler : IRequestHandler<DeleteAppointmentCommand
     {
         var response = new BaseResponse<bool>();
 
-        try
-        {
-            response.Data = await _unitOfWork.Appointment.ExecAsync(StoreProcedures.uspAppointmentRemove, request);
+        response.Data = await _unitOfWork.Appointment.ExecAsync(StoreProcedures.uspAppointmentRemove, request);
 
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = GlobalMessage.MESSAGE_DELETE;
-            }
-        }
-        catch (Exception ex)
+        if (response.Data)
         {
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Message = GlobalMessage.MESSAGE_DELETE;
         }
 
         return response;

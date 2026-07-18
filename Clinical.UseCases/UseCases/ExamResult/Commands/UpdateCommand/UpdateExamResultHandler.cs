@@ -23,22 +23,14 @@ public class UpdateExamResultHandler : IRequestHandler<UpdateExamResultCommand, 
     {
         var response = new BaseResponse<bool>();
 
-        try
-        {
-            var examResult = _mapper.Map<Entity.ExamResult>(request);
-            var parameters = examResult.GetPropertiesWithValues();
-            response.Data = await _unitOfWork.ExamResult.ExecAsync(StoreProcedures.uspExamResultEdit, parameters);
+        var examResult = _mapper.Map<Entity.ExamResult>(request);
+        var parameters = examResult.GetPropertiesWithValues();
+        response.Data = await _unitOfWork.ExamResult.ExecAsync(StoreProcedures.uspExamResultEdit, parameters);
 
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = GlobalMessage.MESSAGE_UPDATE;
-            }
-        }
-        catch (Exception ex)
+        if (response.Data)
         {
-            response.IsSuccess = false;
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Message = GlobalMessage.MESSAGE_UPDATE;
         }
 
         return response;

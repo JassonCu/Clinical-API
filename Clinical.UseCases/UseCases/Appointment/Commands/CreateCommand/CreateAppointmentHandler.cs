@@ -23,21 +23,14 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
     {
         var response = new BaseResponse<bool>();
 
-        try
-        {
-            var appointment = _mapper.Map<Entity.Appointment>(request);
-            var parameters = appointment.GetPropertiesWithValues();
-            response.Data = await _unitOfWork.Appointment.ExecAsync(StoreProcedures.uspAppointmentRegister, parameters);
+        var appointment = _mapper.Map<Entity.Appointment>(request);
+        var parameters = appointment.GetPropertiesWithValues();
+        response.Data = await _unitOfWork.Appointment.ExecAsync(StoreProcedures.uspAppointmentRegister, parameters);
 
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = GlobalMessage.MESSAGE_SAVE;
-            }
-        }
-        catch (Exception ex)
+        if (response.Data)
         {
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Message = GlobalMessage.MESSAGE_SAVE;
         }
 
         return response;

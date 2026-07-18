@@ -19,20 +19,13 @@ namespace Clinical.UseCases.UseCases.User.Queries.GetAllQuery
         {
             var response = new BaseResponse<IEnumerable<UserListDto>>();
 
-            try
-            {
-                var users = await _userRepository.GetAllUsersAsync();
+            var users = await _userRepository.GetAllUsersAsync();
 
-                if (users is not null)
-                {
-                    response.IsSuccess = true;
-                    response.Data = users;
-                    response.Message = GlobalMessage.MESSAGE_QUERY;
-                }
-            }
-            catch (Exception ex)
+            if (users is not null)
             {
-                response.Message = ex.Message;
+                response.IsSuccess = true;
+                response.Data = users;
+                response.Message = GlobalMessage.MESSAGE_QUERY;
             }
 
             return response;

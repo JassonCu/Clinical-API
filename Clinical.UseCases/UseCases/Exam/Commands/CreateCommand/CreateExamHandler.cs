@@ -23,22 +23,15 @@ public class CreateExamHandler : IRequestHandler<CreateExamCommand, BaseResponse
     {
         var response = new BaseResponse<bool>();
 
-        try
-        {
-            var exam = _mapper.Map<Entity.Exam>(request);
-            exam.State = 1;
-            var parameters = exam.GetPropertiesWithValues();
-            response.Data = await _unitOfWork.Exam.ExecAsync(StoreProcedures.uspExamRegister, parameters);
+        var exam = _mapper.Map<Entity.Exam>(request);
+        exam.State = 1;
+        var parameters = exam.GetPropertiesWithValues();
+        response.Data = await _unitOfWork.Exam.ExecAsync(StoreProcedures.uspExamRegister, parameters);
 
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = GlobalMessage.MESSAGE_SAVE;
-            }
-        }
-        catch (Exception ex)
+        if (response.Data)
         {
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Message = GlobalMessage.MESSAGE_SAVE;
         }
 
         return response;

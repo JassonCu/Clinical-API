@@ -23,23 +23,17 @@ public class CreateAnalysisHandler : IRequestHandler<CreateAnalysisCommand, Base
     {
         var response = new BaseResponse<bool>();
 
-        try
-        {
-            var analysis = _mapper.Map<Entity.Analysis>(request);
-            analysis.State = 1;
-            var parameters = analysis.GetPropertiesWithValues();
-            response.Data = await _unitOfWork.Analysis.ExecAsync(StoreProcedures.uspAnalysisRegister, parameters);
+        var analysis = _mapper.Map<Entity.Analysis>(request);
+        analysis.State = 1;
+        var parameters = analysis.GetPropertiesWithValues();
+        response.Data = await _unitOfWork.Analysis.ExecAsync(StoreProcedures.uspAnalysisRegister, parameters);
 
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = GlobalMessage.MESSAGE_SAVE;
-            }
-        }
-        catch (Exception ex)
+        if (response.Data)
         {
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Message = GlobalMessage.MESSAGE_SAVE;
         }
+
         return response;
     }
 }

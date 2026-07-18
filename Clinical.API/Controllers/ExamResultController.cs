@@ -15,7 +15,7 @@ namespace Clinical.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class ExamResultController : ControllerBase
+    public class ExamResultController : ApiControllerBase
     {
         private readonly IMediator _mediator;
 
@@ -28,56 +28,56 @@ namespace Clinical.API.Controllers
         public async Task<IActionResult> ListExamResults()
         {
             var response = await _mediator.Send(new GetAllExamResultQuery());
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpGet("{examResultId:int}")]
         public async Task<IActionResult> GetExamResultById(int examResultId)
         {
             var response = await _mediator.Send(new GetExamResultByIdQuery() { ExamResultId = examResultId });
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpGet("ByPatient/{patientId:int}")]
         public async Task<IActionResult> GetByPatient(int patientId)
         {
             var response = await _mediator.Send(new GetExamResultsByPatientQuery() { PatientId = patientId });
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpGet("ByAppointment/{appointmentId:int}")]
         public async Task<IActionResult> GetByAppointment(int appointmentId)
         {
             var response = await _mediator.Send(new GetExamResultsByAppointmentQuery() { AppointmentId = appointmentId });
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterExamResult([FromBody] CreateExamResultCommand command)
         {
             var response = await _mediator.Send(command);
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status201Created);
         }
 
         [HttpPut("Edit")]
         public async Task<IActionResult> EditExamResult([FromBody] UpdateExamResultCommand command)
         {
             var response = await _mediator.Send(command);
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
 
         [HttpDelete("Remove/{examResultId:int}")]
         public async Task<IActionResult> RemoveExamResult(int examResultId)
         {
             var response = await _mediator.Send(new DeleteExamResultCommand() { ExamResultId = examResultId });
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
 
         [HttpPatch("ChangeState")]
         public async Task<IActionResult> ChangeState([FromBody] ChangeStateExamResultCommand command)
         {
             var response = await _mediator.Send(command);
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
     }
 }

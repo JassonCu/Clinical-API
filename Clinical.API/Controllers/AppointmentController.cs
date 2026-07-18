@@ -15,7 +15,7 @@ namespace Clinical.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class AppointmentController : ControllerBase
+    public class AppointmentController : ApiControllerBase
     {
         private readonly IMediator _mediator;
 
@@ -28,56 +28,56 @@ namespace Clinical.API.Controllers
         public async Task<IActionResult> ListAppointments()
         {
             var response = await _mediator.Send(new GetAllAppointmentQuery());
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpGet("{appointmentId:int}")]
         public async Task<IActionResult> GetAppointmentById(int appointmentId)
         {
             var response = await _mediator.Send(new GetAppointmentByIdQuery() { AppointmentId = appointmentId });
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpGet("ByPatient/{patientId:int}")]
         public async Task<IActionResult> GetByPatient(int patientId)
         {
             var response = await _mediator.Send(new GetAppointmentsByPatientQuery() { PatientId = patientId });
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpGet("ByDoctor/{doctorId:int}")]
         public async Task<IActionResult> GetByDoctor(int doctorId)
         {
             var response = await _mediator.Send(new GetAppointmentsByDoctorQuery() { DoctorId = doctorId });
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterAppointment([FromBody] CreateAppointmentCommand command)
         {
             var response = await _mediator.Send(command);
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status201Created);
         }
 
         [HttpPut("Edit")]
         public async Task<IActionResult> EditAppointment([FromBody] UpdateAppointmentCommand command)
         {
             var response = await _mediator.Send(command);
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
 
         [HttpDelete("Remove/{appointmentId:int}")]
         public async Task<IActionResult> RemoveAppointment(int appointmentId)
         {
             var response = await _mediator.Send(new DeleteAppointmentCommand() { AppointmentId = appointmentId });
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
 
         [HttpPatch("ChangeState")]
         public async Task<IActionResult> ChangeState([FromBody] ChangeStateAppointmentCommand command)
         {
             var response = await _mediator.Send(command);
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
     }
 }

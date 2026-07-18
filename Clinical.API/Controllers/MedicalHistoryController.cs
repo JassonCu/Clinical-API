@@ -12,7 +12,7 @@ namespace Clinical.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class MedicalHistoryController : ControllerBase
+    public class MedicalHistoryController : ApiControllerBase
     {
         private readonly IMediator _mediator;
 
@@ -25,28 +25,28 @@ namespace Clinical.API.Controllers
         public async Task<IActionResult> GetById(int medicalHistoryId)
         {
             var response = await _mediator.Send(new GetMedicalHistoryByIdQuery { MedicalHistoryId = medicalHistoryId });
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpGet("ByPatient/{patientId:int}")]
         public async Task<IActionResult> GetByPatient(int patientId)
         {
             var response = await _mediator.Send(new GetMedicalHistoryByPatientQuery { PatientId = patientId });
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] CreateMedicalHistoryCommand command)
         {
             var response = await _mediator.Send(command);
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status201Created);
         }
 
         [HttpPut("Edit")]
         public async Task<IActionResult> Edit([FromBody] UpdateMedicalHistoryCommand command)
         {
             var response = await _mediator.Send(command);
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
 
         [HttpDelete("Remove/{medicalHistoryId:int}")]
@@ -54,7 +54,7 @@ namespace Clinical.API.Controllers
         public async Task<IActionResult> Remove(int medicalHistoryId)
         {
             var response = await _mediator.Send(new DeleteMedicalHistoryCommand { MedicalHistoryId = medicalHistoryId });
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
     }
 }

@@ -22,15 +22,13 @@ public class CreateMedicineHandler : IRequestHandler<CreateMedicineCommand, Base
     public async Task<BaseResponse<bool>> Handle(CreateMedicineCommand request, CancellationToken cancellationToken)
     {
         var response = new BaseResponse<bool>();
-        try
-        {
-            var entity = _mapper.Map<Entity.Medicine>(request);
-            entity.State = 1;
-            var parameters = entity.GetPropertiesWithValues();
-            response.Data = await _unitOfWork.Medicine.ExecAsync(StoreProcedures.uspMedicineRegister, parameters);
-            if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_SAVE; }
-        }
-        catch (Exception ex) { response.Message = ex.Message; }
+
+        var entity = _mapper.Map<Entity.Medicine>(request);
+        entity.State = 1;
+        var parameters = entity.GetPropertiesWithValues();
+        response.Data = await _unitOfWork.Medicine.ExecAsync(StoreProcedures.uspMedicineRegister, parameters);
+        if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_SAVE; }
+
         return response;
     }
 }

@@ -22,23 +22,15 @@ public class GetAllAnalysisHandler : IRequestHandler<GetAllAnalysisQuery, BaseRe
     {
         var response = new BaseResponse<IEnumerable<GetAnalysisResponseDto>>();
 
-        try
+        var analysis = await _unitOfWork.Analysis.GetAllAsync(StoreProcedures.uspAnalysisList);
+
+        if (analysis is not null)
         {
-            var analysis = await _unitOfWork.Analysis.GetAllAsync(StoreProcedures.uspAnalysisList);
-
-            if (analysis is not null)
-            {
-                response.IsSuccess = true;
-                response.Data = _mapper.Map<IEnumerable<GetAnalysisResponseDto>>(analysis);
-                response.Message = GlobalMessage.MESSAGE_QUERY;
-            }
-
+            response.IsSuccess = true;
+            response.Data = _mapper.Map<IEnumerable<GetAnalysisResponseDto>>(analysis);
+            response.Message = GlobalMessage.MESSAGE_QUERY;
         }
 
-        catch (Exception ex)
-        {
-            response.Message = ex.Message;
-        }
         return response;
     }
 }

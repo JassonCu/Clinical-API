@@ -3,6 +3,7 @@ using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
 using Clinical.Utils.Constants;
 using MediatR;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.ExamResult.Queries.GetByIdQuery;
 
@@ -19,25 +20,13 @@ public class GetExamResultByIdHandler : IRequestHandler<GetExamResultByIdQuery, 
     {
         var response = new BaseResponse<GetExamResultByIdResponseDto>();
 
-        try
-        {
-            var result = await _examResultRepository.GetExamResultById(StoreProcedures.uspExamResultById, request);
+        var result = await _examResultRepository.GetExamResultById(StoreProcedures.uspExamResultById, request);
 
-            if (result is null)
-            {
-                response.IsSuccess = false;
-                response.Message = GlobalMessage.MESSAGE_QUERY_EMPTY;
-                return response;
-            }
+        if (result is null) throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
 
-            response.IsSuccess = true;
-            response.Data = result;
-            response.Message = GlobalMessage.MESSAGE_QUERY;
-        }
-        catch (Exception ex)
-        {
-            response.Message = ex.Message;
-        }
+        response.IsSuccess = true;
+        response.Data = result;
+        response.Message = GlobalMessage.MESSAGE_QUERY;
 
         return response;
     }

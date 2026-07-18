@@ -19,28 +19,20 @@ namespace Clinical.UseCases.UseCases.User.Commands.UpdateCommand
         {
             var response = new BaseResponse<bool>();
 
-            try
+            var dto = new UpdateUserDto
             {
-                var dto = new UpdateUserDto
-                {
-                    UserId    = request.UserId,
-                    FirstName = request.FirstName,
-                    LastName  = request.LastName,
-                    Email     = request.Email,
-                    RoleId    = request.RoleId
-                };
+                UserId = request.UserId,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                Email = request.Email,
+                RoleId = request.RoleId
+            };
 
-                await _userRepository.UpdateUserAsync(dto);
+            await _userRepository.UpdateUserAsync(dto);
 
-                response.IsSuccess = true;
-                response.Data = true;
-                response.Message = GlobalMessage.MESSAGE_UPDATE;
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Message = ex.Message;
-            }
+            response.IsSuccess = true;
+            response.Data = true;
+            response.Message = GlobalMessage.MESSAGE_UPDATE;
 
             return response;
         }

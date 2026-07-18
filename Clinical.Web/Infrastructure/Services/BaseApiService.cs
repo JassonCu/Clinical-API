@@ -1,7 +1,6 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using Clinical.Web.Core.Models;
 
 namespace Clinical.Web.Infrastructure.Services;
 
@@ -33,6 +32,7 @@ public abstract class BaseApiService
         return client;
     }
 
+    /// <summary>GET → deserializes the raw payload on 2xx; default on 404/error.</summary>
     protected async Task<T?> GetAsync<T>(string endpoint)
     {
         try
@@ -41,8 +41,7 @@ public abstract class BaseApiService
             var response = await client.GetAsync(endpoint);
             if (!response.IsSuccessStatusCode) return default;
             var json = await response.Content.ReadAsStringAsync();
-            var wrapped = JsonSerializer.Deserialize<ApiResponse<T>>(json, JsonOptions);
-            return wrapped is { IsSuccess: true } ? wrapped.Data : default;
+            return string.IsNullOrWhiteSpace(json) ? default : JsonSerializer.Deserialize<T>(json, JsonOptions);
         }
         catch (Exception ex)
         {
@@ -51,25 +50,42 @@ public abstract class BaseApiService
         }
     }
 
-    protected async Task<(bool Success, string? Error)> PostAsync<T>(string endpoint, T body)
+    protected Task<(bool Success, string? Error)> PostAsync<T>(string endpoint, T body)
+        => SendAsync(HttpMethod.Post, endpoint, body);
+
+    protected Task<(bool Success, string? Error)> PutAsync<T>(string endpoint, T body)
+        => SendAsync(HttpMethod.Put, endpoint, body);
+
+    protected Task<(bool Success, string? Error)> PatchAsync<T>(string endpoint, T body)
+        => SendAsync(HttpMethod.Patch, endpoint, body);
+
+    protected Task<(bool Success, string? Error)> DeleteAsync(string endpoint)
+        => SendAsync<object?>(HttpMethod.Delete, endpoint, null);
+
+    /// <summary>Command call → success is the HTTP status (200/201/204); error text comes from ProblemDetails.</summary>
+    private async Task<(bool Success, string? Error)> SendAsync<T>(HttpMethod method, string endpoint, T? body)
     {
         try
         {
             var client = CreateClient();
-            var content = new StringContent(JsonSerializer.Serialize(body, JsonOptions), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync(endpoint, content);
+            using var request = new HttpRequestMessage(method, endpoint);
+            if (body is not null)
+                request.Content = new StringContent(JsonSerializer.Serialize(body, JsonOptions), Encoding.UTF8, "application/json");
+
+            var response = await client.SendAsync(request);
+            if (response.IsSuccessStatusCode) return (true, null);
+
             var json = await response.Content.ReadAsStringAsync();
-            var wrapped = TryDeserializeBase(json);
-            if (response.IsSuccessStatusCode && (wrapped?.IsSuccess ?? true)) return (true, null);
-            return (false, wrapped?.Message ?? TryExtractError(json));
+            return (false, ExtractProblem(json));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "POST {Endpoint} failed", endpoint);
+            _logger.LogError(ex, "{Method} {Endpoint} failed", method, endpoint);
             return (false, "Error de conexión con el servidor.");
         }
     }
 
+    /// <summary>POST that returns a payload (e.g. auth tokens) → deserializes the raw result on 2xx.</summary>
     protected async Task<(bool Success, TResult? Data, string? Error)> PostWithResultAsync<T, TResult>(string endpoint, T body)
     {
         try
@@ -78,14 +94,13 @@ public abstract class BaseApiService
             var content = new StringContent(JsonSerializer.Serialize(body, JsonOptions), Encoding.UTF8, "application/json");
             var response = await client.PostAsync(endpoint, content);
             var json = await response.Content.ReadAsStringAsync();
+
             if (response.IsSuccessStatusCode)
             {
-                var wrapped = JsonSerializer.Deserialize<ApiResponse<TResult>>(json, JsonOptions);
-                if (wrapped is { IsSuccess: true })
-                    return (true, wrapped.Data, null);
-                return (false, default, wrapped?.Message ?? "Error en la operación.");
+                var data = string.IsNullOrWhiteSpace(json) ? default : JsonSerializer.Deserialize<TResult>(json, JsonOptions);
+                return (true, data, null);
             }
-            return (false, default, TryExtractError(json));
+            return (false, default, ExtractProblem(json));
         }
         catch (Exception ex)
         {
@@ -94,79 +109,19 @@ public abstract class BaseApiService
         }
     }
 
-    protected async Task<(bool Success, string? Error)> PutAsync<T>(string endpoint, T body)
-    {
-        try
-        {
-            var client = CreateClient();
-            var content = new StringContent(JsonSerializer.Serialize(body, JsonOptions), Encoding.UTF8, "application/json");
-            var response = await client.PutAsync(endpoint, content);
-            var json = await response.Content.ReadAsStringAsync();
-            var wrapped = TryDeserializeBase(json);
-            if (response.IsSuccessStatusCode && (wrapped?.IsSuccess ?? true)) return (true, null);
-            return (false, wrapped?.Message ?? TryExtractError(json));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "PUT {Endpoint} failed", endpoint);
-            return (false, "Error de conexión con el servidor.");
-        }
-    }
-
-    protected async Task<(bool Success, string? Error)> PatchAsync<T>(string endpoint, T body)
-    {
-        try
-        {
-            var client = CreateClient();
-            var content = new StringContent(JsonSerializer.Serialize(body, JsonOptions), Encoding.UTF8, "application/json");
-            var response = await client.PatchAsync(endpoint, content);
-            var json = await response.Content.ReadAsStringAsync();
-            var wrapped = TryDeserializeBase(json);
-            if (response.IsSuccessStatusCode && (wrapped?.IsSuccess ?? true)) return (true, null);
-            return (false, wrapped?.Message ?? TryExtractError(json));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "PATCH {Endpoint} failed", endpoint);
-            return (false, "Error de conexión con el servidor.");
-        }
-    }
-
-    protected async Task<(bool Success, string? Error)> DeleteAsync(string endpoint)
-    {
-        try
-        {
-            var client = CreateClient();
-            var response = await client.DeleteAsync(endpoint);
-            var json = await response.Content.ReadAsStringAsync();
-            var wrapped = TryDeserializeBase(json);
-            if (response.IsSuccessStatusCode && (wrapped?.IsSuccess ?? true)) return (true, null);
-            return (false, wrapped?.Message ?? TryExtractError(json));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "DELETE {Endpoint} failed", endpoint);
-            return (false, "Error de conexión con el servidor.");
-        }
-    }
-
-    private ApiResponse? TryDeserializeBase(string json)
-    {
-        try { return JsonSerializer.Deserialize<ApiResponse>(json, JsonOptions); }
-        catch { return null; }
-    }
-
-    private static string TryExtractError(string json)
+    /// <summary>Pulls a human message out of an RFC 9457 problem+json body.</summary>
+    private static string ExtractProblem(string json)
     {
         try
         {
             using var doc = JsonDocument.Parse(json);
-            if (doc.RootElement.TryGetProperty("message", out var msg) && msg.ValueKind == JsonValueKind.String)
-                return msg.GetString() ?? "Error desconocido";
-            if (doc.RootElement.TryGetProperty("title", out var title))
-                return title.GetString() ?? "Error desconocido";
+            var root = doc.RootElement;
+            if (root.TryGetProperty("detail", out var detail) && detail.ValueKind == JsonValueKind.String)
+                return detail.GetString()!;
+            if (root.TryGetProperty("title", out var title) && title.ValueKind == JsonValueKind.String)
+                return title.GetString()!;
         }
-        catch { }
+        catch { /* non-JSON body */ }
         return "Error en la operación.";
     }
 }

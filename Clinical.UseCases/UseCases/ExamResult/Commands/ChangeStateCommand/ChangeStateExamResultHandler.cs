@@ -23,21 +23,14 @@ public class ChangeStateExamResultHandler : IRequestHandler<ChangeStateExamResul
     {
         var response = new BaseResponse<bool>();
 
-        try
-        {
-            var examResult = _mapper.Map<Entity.ExamResult>(request);
-            var parameters = examResult.GetPropertiesWithValues();
-            response.Data = await _unitOfWork.ExamResult.ExecAsync(StoreProcedures.uspExamResultChangeState, parameters);
+        var examResult = _mapper.Map<Entity.ExamResult>(request);
+        var parameters = examResult.GetPropertiesWithValues();
+        response.Data = await _unitOfWork.ExamResult.ExecAsync(StoreProcedures.uspExamResultChangeState, parameters);
 
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = GlobalMessage.MESSAGE_UPDATE_STATE;
-            }
-        }
-        catch (Exception ex)
+        if (response.Data)
         {
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Message = GlobalMessage.MESSAGE_UPDATE_STATE;
         }
 
         return response;

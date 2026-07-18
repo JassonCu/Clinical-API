@@ -21,39 +21,34 @@ namespace Clinical.UseCases.UseCases.User.Commands.GenerateResetTokenCommand
         public async Task<BaseResponse<GenerateResetTokenResponseDto>> Handle(GenerateResetTokenCommand request, CancellationToken cancellationToken)
         {
             var response = new BaseResponse<GenerateResetTokenResponseDto>();
-            try
+
+            var user = await _userRepo.GetUserByIdAsync(request.UserId);
+            if (user is null)
             {
-                var user = await _userRepo.GetUserByIdAsync(request.UserId);
-                if (user is null)
-                {
-                    response.IsSuccess = false;
-                    response.Message = "Usuario no encontrado.";
-                    return response;
-                }
-
-                var rawBytes = new byte[32];
-                RandomNumberGenerator.Fill(rawBytes);
-                var rawToken = Convert.ToBase64String(rawBytes);
-
-                var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(rawToken));
-                var tokenHash = Convert.ToHexString(hashBytes).ToLower();
-
-                var expiresAt = DateTime.UtcNow.AddHours(24);
-                await _resetRepo.CreateTokenAsync(request.UserId, tokenHash, expiresAt);
-
-                response.IsSuccess = true;
-                response.Message = "Token generado. Compártalo de forma segura con el usuario.";
-                response.Data = new GenerateResetTokenResponseDto
-                {
-                    RawToken = rawToken,
-                    ExpiresAt = expiresAt,
-                    TargetUsername = user.Username ?? string.Empty
-                };
+                response.IsSuccess = false;
+                response.Message = "Usuario no encontrado.";
+                return response;
             }
-            catch (Exception ex)
+
+            var rawBytes = new byte[32];
+            RandomNumberGenerator.Fill(rawBytes);
+            var rawToken = Convert.ToBase64String(rawBytes);
+
+            var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(rawToken));
+            var tokenHash = Convert.ToHexString(hashBytes).ToLower();
+
+            var expiresAt = DateTime.UtcNow.AddHours(24);
+            await _resetRepo.CreateTokenAsync(request.UserId, tokenHash, expiresAt);
+
+            response.IsSuccess = true;
+            response.Message = "Token generado. Compártalo de forma segura con el usuario.";
+            response.Data = new GenerateResetTokenResponseDto
             {
-                response.Message = ex.Message;
-            }
+                RawToken = rawToken,
+                ExpiresAt = expiresAt,
+                TargetUsername = user.Username ?? string.Empty
+            };
+
             return response;
         }
     }

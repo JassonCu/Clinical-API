@@ -31,8 +31,7 @@ namespace Clinical.Test
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var responseAssert = Assert.IsAssignableFrom<BaseResponse<IEnumerable<GetAllExamResponseDto>>>(okResult.Value);
-            var model = responseAssert.Data;
+            var model = Assert.IsAssignableFrom<IEnumerable<GetAllExamResponseDto>>(okResult.Value);
             Assert.Empty(model);
         }
 
@@ -58,8 +57,7 @@ namespace Clinical.Test
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var response = Assert.IsType<BaseResponse<GetExamByIdResponseDto>>(okResult.Value);
-            var model = Assert.IsAssignableFrom<GetExamByIdResponseDto>(response.Data);
+            var model = Assert.IsType<GetExamByIdResponseDto>(okResult.Value);
             Assert.Equal(expectedExam.ExamId, model.ExamId);
             Assert.Equal(expectedExam.Name, model.Name);
         }

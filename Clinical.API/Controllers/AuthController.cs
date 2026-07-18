@@ -11,8 +11,7 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace Clinical.API.Controllers;
 
 [Route("api/[controller]")]
-[ApiController]
-public class AuthController : ControllerBase
+public class AuthController : ApiControllerBase
 {
     private readonly IMediator _mediator;
 
@@ -25,40 +24,25 @@ public class AuthController : ControllerBase
     [EnableRateLimiting("auth")]
     [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginCommand command)
-    {
-        var response = await _mediator.Send(command);
-        return Ok(response);
-    }
+        => PayloadResult(await _mediator.Send(command), StatusCodes.Status401Unauthorized);
 
     [HttpPost("Register")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Register([FromBody] RegisterCommand command)
-    {
-        var response = await _mediator.Send(command);
-        return Ok(response);
-    }
+        => CommandResult(await _mediator.Send(command), StatusCodes.Status201Created);
 
     [HttpPost("RefreshToken")]
     [AllowAnonymous]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
-    {
-        var response = await _mediator.Send(command);
-        return Ok(response);
-    }
+        => PayloadResult(await _mediator.Send(command), StatusCodes.Status401Unauthorized);
 
     [HttpPost("reset-password")]
     [AllowAnonymous]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
-    {
-        var response = await _mediator.Send(command);
-        return Ok(response);
-    }
+        => CommandResult(await _mediator.Send(command), StatusCodes.Status200OK);
 
     [HttpPost("change-password")]
     [Authorize]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
-    {
-        var response = await _mediator.Send(command);
-        return Ok(response);
-    }
+        => CommandResult(await _mediator.Send(command), StatusCodes.Status200OK);
 }

@@ -4,6 +4,7 @@ using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
 using Clinical.Utils.Constants;
 using MediatR;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.Exam.Queries.GetByIdQuery;
 
@@ -21,26 +22,14 @@ public class GetExamByIdHandler : IRequestHandler<GetExamByIdQuery, BaseResponse
     public async Task<BaseResponse<GetExamByIdResponseDto>> Handle(GetExamByIdQuery request, CancellationToken cancellationToken)
     {
         var response = new BaseResponse<GetExamByIdResponseDto>();
-        try
-        {
-            var exam = await _unitOfWork.Exam.GetByIdAsync(StoreProcedures.uspExamById, request);
 
-            if (exam is null)
-            {
-                response.IsSuccess = false;
-                response.Message = GlobalMessage.MESSAGE_QUERY_EMPTY;
-                return response;
-            }
+        var exam = await _unitOfWork.Exam.GetByIdAsync(StoreProcedures.uspExamById, request);
 
-            response.IsSuccess = true;
-            response.Data = _mapper.Map<GetExamByIdResponseDto>(exam);
-            response.Message = GlobalMessage.MESSAGE_QUERY;
+        if (exam is null) throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
 
-        }
-        catch (Exception ex)
-        {
-            response.Message = ex.Message;
-        }
+        response.IsSuccess = true;
+        response.Data = _mapper.Map<GetExamByIdResponseDto>(exam);
+        response.Message = GlobalMessage.MESSAGE_QUERY;
 
         return response;
     }

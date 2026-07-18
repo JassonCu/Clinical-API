@@ -11,9 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace Clinical.API.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
     [Authorize(Roles = "Admin")]
-    public class UserController : ControllerBase
+    public class UserController : ApiControllerBase
     {
         private readonly IMediator _mediator;
 
@@ -21,44 +20,26 @@ namespace Clinical.API.Controllers
 
         [HttpGet]
         public async Task<IActionResult> ListUsers()
-        {
-            var response = await _mediator.Send(new GetAllUsersQuery());
-            return Ok(response);
-        }
+            => DataResult(await _mediator.Send(new GetAllUsersQuery()));
 
         [HttpGet("{userId:int}")]
         public async Task<IActionResult> GetUserById(int userId)
-        {
-            var response = await _mediator.Send(new GetUserByIdQuery { UserId = userId });
-            return Ok(response);
-        }
+            => DataResult(await _mediator.Send(new GetUserByIdQuery { UserId = userId }));
 
         [HttpPut("Edit")]
         public async Task<IActionResult> EditUser([FromBody] UpdateUserCommand command)
-        {
-            var response = await _mediator.Send(command);
-            return Ok(response);
-        }
+            => CommandResult(await _mediator.Send(command), StatusCodes.Status204NoContent);
 
         [HttpPatch("ChangeState")]
         public async Task<IActionResult> ChangeState([FromBody] ChangeStateUserCommand command)
-        {
-            var response = await _mediator.Send(command);
-            return Ok(response);
-        }
+            => CommandResult(await _mediator.Send(command), StatusCodes.Status204NoContent);
 
         [HttpGet("roles")]
         public async Task<IActionResult> ListRoles()
-        {
-            var response = await _mediator.Send(new GetAllRolesQuery());
-            return Ok(response);
-        }
+            => DataResult(await _mediator.Send(new GetAllRolesQuery()));
 
         [HttpPost("{userId:int}/reset-password")]
         public async Task<IActionResult> GenerateResetToken(int userId)
-        {
-            var response = await _mediator.Send(new GenerateResetTokenCommand { UserId = userId });
-            return Ok(response);
-        }
+            => PayloadResult(await _mediator.Send(new GenerateResetTokenCommand { UserId = userId }));
     }
 }

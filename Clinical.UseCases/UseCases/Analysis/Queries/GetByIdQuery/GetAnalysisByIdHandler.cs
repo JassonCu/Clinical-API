@@ -4,6 +4,7 @@ using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
 using Clinical.Utils.Constants;
 using MediatR;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.Analysis.Queries.GetByIdQuery;
 
@@ -22,24 +23,17 @@ public class GetAnalysisByIdHandler : IRequestHandler<GetAnalysisByIdQuery, Base
     {
         var response = new BaseResponse<GetAnalysisByIdResponseDto>();
 
-        try
-        {
-            var analysis = await _unitOfWork.Analysis.GetByIdAsync(StoreProcedures.uspAnalysisById, request);
+        var analysis = await _unitOfWork.Analysis.GetByIdAsync(StoreProcedures.uspAnalysisById, request);
 
-            if (analysis is null)
-            {
-                response.IsSuccess = false;
-                response.Message = GlobalMessage.MESSAGE_QUERY_EMPTY;
-            }
-
-            response.IsSuccess = true;
-            response.Data = _mapper.Map<GetAnalysisByIdResponseDto>(analysis);
-            response.Message = GlobalMessage.MESSAGE_QUERY;
-        }
-        catch (Exception ex)
+        if (analysis is null)
         {
-            response.Message = ex.Message;
+            response.IsSuccess = false;
+            response.Message = GlobalMessage.MESSAGE_QUERY_EMPTY;
         }
+
+        response.IsSuccess = true;
+        response.Data = _mapper.Map<GetAnalysisByIdResponseDto>(analysis);
+        response.Message = GlobalMessage.MESSAGE_QUERY;
 
         return response;
     }

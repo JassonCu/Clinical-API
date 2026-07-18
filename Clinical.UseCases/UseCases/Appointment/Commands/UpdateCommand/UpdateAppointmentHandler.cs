@@ -23,22 +23,14 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
     {
         var response = new BaseResponse<bool>();
 
-        try
-        {
-            var appointment = _mapper.Map<Entity.Appointment>(request);
-            var parameters = appointment.GetPropertiesWithValues();
-            response.Data = await _unitOfWork.Appointment.ExecAsync(StoreProcedures.uspAppointmentEdit, parameters);
+        var appointment = _mapper.Map<Entity.Appointment>(request);
+        var parameters = appointment.GetPropertiesWithValues();
+        response.Data = await _unitOfWork.Appointment.ExecAsync(StoreProcedures.uspAppointmentEdit, parameters);
 
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = GlobalMessage.MESSAGE_UPDATE;
-            }
-        }
-        catch (Exception ex)
+        if (response.Data)
         {
-            response.IsSuccess = false;
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Message = GlobalMessage.MESSAGE_UPDATE;
         }
 
         return response;

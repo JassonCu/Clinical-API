@@ -23,21 +23,14 @@ public class CreateDoctorHandler : IRequestHandler<CreateDoctorCommand, BaseResp
     {
         var response = new BaseResponse<bool>();
 
-        try
-        {
-            var doctor = _mapper.Map<Entity.Doctor>(request);
-            var parameters = doctor.GetPropertiesWithValues();
-            response.Data = await _unitOfWork.Doctor.ExecAsync(StoreProcedures.uspDoctorRegister, parameters);
+        var doctor = _mapper.Map<Entity.Doctor>(request);
+        var parameters = doctor.GetPropertiesWithValues();
+        response.Data = await _unitOfWork.Doctor.ExecAsync(StoreProcedures.uspDoctorRegister, parameters);
 
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = GlobalMessage.MESSAGE_SAVE;
-            }
-        }
-        catch (Exception ex)
+        if (response.Data)
         {
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Message = GlobalMessage.MESSAGE_SAVE;
         }
 
         return response;

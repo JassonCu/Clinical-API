@@ -4,38 +4,30 @@ using Clinical.UseCases.Commons.Bases;
 using Clinical.Utils.Constants;
 using MediatR;
 
-namespace Clinical.UseCases.UseCases.Appointment.Queries.GetAllQuery
+namespace Clinical.UseCases.UseCases.Appointment.Queries.GetAllQuery;
+
+public class GetAllAppointmentHandler : IRequestHandler<GetAllAppointmentQuery, BaseResponse<IEnumerable<GetAllAppointmentResponseDto>>>
 {
-    public class GetAllAppointmentHandler : IRequestHandler<GetAllAppointmentQuery, BaseResponse<IEnumerable<GetAllAppointmentResponseDto>>>
+    private readonly IAppointmentRepository _appointmentRepository;
+
+    public GetAllAppointmentHandler(IAppointmentRepository appointmentRepository)
     {
-        private readonly IAppointmentRepository _appointmentRepository;
+        _appointmentRepository = appointmentRepository;
+    }
 
-        public GetAllAppointmentHandler(IAppointmentRepository appointmentRepository)
+    public async Task<BaseResponse<IEnumerable<GetAllAppointmentResponseDto>>> Handle(GetAllAppointmentQuery request, CancellationToken cancellationToken)
+    {
+        var response = new BaseResponse<IEnumerable<GetAllAppointmentResponseDto>>();
+
+        var appointments = await _appointmentRepository.GetAllAppointments(StoreProcedures.uspAppointmentList);
+
+        if (appointments is not null)
         {
-            _appointmentRepository = appointmentRepository;
+            response.IsSuccess = true;
+            response.Data = appointments;
+            response.Message = GlobalMessage.MESSAGE_QUERY;
         }
 
-        public async Task<BaseResponse<IEnumerable<GetAllAppointmentResponseDto>>> Handle(GetAllAppointmentQuery request, CancellationToken cancellationToken)
-        {
-            var response = new BaseResponse<IEnumerable<GetAllAppointmentResponseDto>>();
-
-            try
-            {
-                var appointments = await _appointmentRepository.GetAllAppointments(StoreProcedures.uspAppointmentList);
-
-                if (appointments is not null)
-                {
-                    response.IsSuccess = true;
-                    response.Data = appointments;
-                    response.Message = GlobalMessage.MESSAGE_QUERY;
-                }
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-
-            return response;
-        }
+        return response;
     }
 }

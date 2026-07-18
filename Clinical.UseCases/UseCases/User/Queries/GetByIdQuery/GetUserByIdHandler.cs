@@ -3,6 +3,7 @@ using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
 using Clinical.Utils.Constants;
 using MediatR;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.User.Queries.GetByIdQuery
 {
@@ -19,25 +20,13 @@ namespace Clinical.UseCases.UseCases.User.Queries.GetByIdQuery
         {
             var response = new BaseResponse<UserDetailDto>();
 
-            try
-            {
-                var user = await _userRepository.GetUserByIdAsync(request.UserId);
+            var user = await _userRepository.GetUserByIdAsync(request.UserId);
 
-                if (user is null)
-                {
-                    response.IsSuccess = false;
-                    response.Message = GlobalMessage.MESSAGE_QUERY_EMPTY;
-                    return response;
-                }
+            if (user is null) throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
 
-                response.IsSuccess = true;
-                response.Data = user;
-                response.Message = GlobalMessage.MESSAGE_QUERY;
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
+            response.IsSuccess = true;
+            response.Data = user;
+            response.Message = GlobalMessage.MESSAGE_QUERY;
 
             return response;
         }

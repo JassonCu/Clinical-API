@@ -21,12 +21,10 @@ namespace Clinical.UseCases.UseCases.PatientAllergy.Queries.GetAllQuery
         public async Task<BaseResponse<IEnumerable<GetAllAllergyResponseDto>>> Handle(GetAllAllergyQuery request, CancellationToken cancellationToken)
         {
             var response = new BaseResponse<IEnumerable<GetAllAllergyResponseDto>>();
-            try
-            {
-                var entities = await _unitOfWork.PatientAllergy.GetAllAsync(StoreProcedures.uspAllergyList);
-                if (entities is not null) { response.IsSuccess = true; response.Data = _mapper.Map<IEnumerable<GetAllAllergyResponseDto>>(entities); response.Message = GlobalMessage.MESSAGE_QUERY; }
-            }
-            catch (Exception ex) { response.Message = ex.Message; }
+
+            var entities = await _unitOfWork.PatientAllergy.GetAllAsync(StoreProcedures.uspAllergyList);
+            if (entities is not null) { response.IsSuccess = true; response.Data = _mapper.Map<IEnumerable<GetAllAllergyResponseDto>>(entities); response.Message = GlobalMessage.MESSAGE_QUERY; }
+
             return response;
         }
     }

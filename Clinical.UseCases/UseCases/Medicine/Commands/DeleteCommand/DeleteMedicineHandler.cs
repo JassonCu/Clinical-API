@@ -13,12 +13,10 @@ public class DeleteMedicineHandler : IRequestHandler<DeleteMedicineCommand, Base
     public async Task<BaseResponse<bool>> Handle(DeleteMedicineCommand request, CancellationToken cancellationToken)
     {
         var response = new BaseResponse<bool>();
-        try
-        {
-            response.Data = await _unitOfWork.Medicine.ExecAsync(StoreProcedures.uspMedicineRemove, request);
-            if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_DELETE; }
-        }
-        catch (Exception ex) { response.Message = ex.Message; }
+
+        response.Data = await _unitOfWork.Medicine.ExecAsync(StoreProcedures.uspMedicineRemove, request);
+        if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_DELETE; }
+
         return response;
     }
 }

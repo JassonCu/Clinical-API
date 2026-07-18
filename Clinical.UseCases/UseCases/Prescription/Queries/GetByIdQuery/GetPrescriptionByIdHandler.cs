@@ -3,6 +3,7 @@ using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
 using Clinical.Utils.Constants;
 using MediatR;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.Prescription.Queries.GetByIdQuery
 {
@@ -18,15 +19,13 @@ namespace Clinical.UseCases.UseCases.Prescription.Queries.GetByIdQuery
         public async Task<BaseResponse<GetPrescriptionByIdResponseDto>> Handle(GetPrescriptionByIdQuery request, CancellationToken cancellationToken)
         {
             var response = new BaseResponse<GetPrescriptionByIdResponseDto>();
-            try
-            {
-                var result = await _prescriptionRepository.GetPrescriptionById(StoreProcedures.uspPrescriptionById, new { request.PrescriptionId });
-                if (result is null) { response.IsSuccess = false; response.Message = GlobalMessage.MESSAGE_QUERY_EMPTY; return response; }
-                response.IsSuccess = true;
-                response.Data = result;
-                response.Message = GlobalMessage.MESSAGE_QUERY;
-            }
-            catch (Exception ex) { response.Message = ex.Message; }
+
+            var result = await _prescriptionRepository.GetPrescriptionById(StoreProcedures.uspPrescriptionById, new { request.PrescriptionId });
+            if (result is null) throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
+            response.IsSuccess = true;
+            response.Data = result;
+            response.Message = GlobalMessage.MESSAGE_QUERY;
+
             return response;
         }
     }

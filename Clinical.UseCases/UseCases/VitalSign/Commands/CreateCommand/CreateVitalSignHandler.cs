@@ -22,19 +22,17 @@ namespace Clinical.UseCases.UseCases.VitalSign.Commands.CreateCommand
         public async Task<BaseResponse<bool>> Handle(CreateVitalSignCommand request, CancellationToken cancellationToken)
         {
             var response = new BaseResponse<bool>();
-            try
-            {
-                var entity = _mapper.Map<Entity.VitalSign>(request);
 
-                if (entity.Weight.HasValue && entity.Height.HasValue && entity.Height > 0)
-                    entity.Bmi = Math.Round(entity.Weight.Value / (decimal)Math.Pow((double)(entity.Height.Value / 100), 2), 2);
+            var entity = _mapper.Map<Entity.VitalSign>(request);
 
-                entity.State = 1;
-                var parameters = entity.GetPropertiesWithValues();
-                response.Data = await _unitOfWork.VitalSign.ExecAsync(StoreProcedures.uspVitalSignRegister, parameters);
-                if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_SAVE; }
-            }
-            catch (Exception ex) { response.Message = ex.Message; }
+            if (entity.Weight.HasValue && entity.Height.HasValue && entity.Height > 0)
+                entity.Bmi = Math.Round(entity.Weight.Value / (decimal)Math.Pow((double)(entity.Height.Value / 100), 2), 2);
+
+            entity.State = 1;
+            var parameters = entity.GetPropertiesWithValues();
+            response.Data = await _unitOfWork.VitalSign.ExecAsync(StoreProcedures.uspVitalSignRegister, parameters);
+            if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_SAVE; }
+
             return response;
         }
     }

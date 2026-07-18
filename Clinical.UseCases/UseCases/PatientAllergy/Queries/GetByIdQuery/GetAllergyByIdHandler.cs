@@ -4,6 +4,7 @@ using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
 using Clinical.Utils.Constants;
 using MediatR;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.PatientAllergy.Queries.GetByIdQuery
 {
@@ -21,15 +22,13 @@ namespace Clinical.UseCases.UseCases.PatientAllergy.Queries.GetByIdQuery
         public async Task<BaseResponse<GetAllAllergyResponseDto>> Handle(GetAllergyByIdQuery request, CancellationToken cancellationToken)
         {
             var response = new BaseResponse<GetAllAllergyResponseDto>();
-            try
-            {
-                var entity = await _unitOfWork.PatientAllergy.GetByIdAsync(StoreProcedures.uspAllergyById, request);
-                if (entity is null) { response.IsSuccess = false; response.Message = GlobalMessage.MESSAGE_QUERY_EMPTY; return response; }
-                response.IsSuccess = true;
-                response.Data = _mapper.Map<GetAllAllergyResponseDto>(entity);
-                response.Message = GlobalMessage.MESSAGE_QUERY;
-            }
-            catch (Exception ex) { response.Message = ex.Message; }
+
+            var entity = await _unitOfWork.PatientAllergy.GetByIdAsync(StoreProcedures.uspAllergyById, request);
+            if (entity is null) throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
+            response.IsSuccess = true;
+            response.Data = _mapper.Map<GetAllAllergyResponseDto>(entity);
+            response.Message = GlobalMessage.MESSAGE_QUERY;
+
             return response;
         }
     }

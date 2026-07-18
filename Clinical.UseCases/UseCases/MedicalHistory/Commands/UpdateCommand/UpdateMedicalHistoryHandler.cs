@@ -22,14 +22,12 @@ public class UpdateMedicalHistoryHandler : IRequestHandler<UpdateMedicalHistoryC
     public async Task<BaseResponse<bool>> Handle(UpdateMedicalHistoryCommand request, CancellationToken cancellationToken)
     {
         var response = new BaseResponse<bool>();
-        try
-        {
-            var entity = _mapper.Map<Entity.MedicalHistory>(request);
-            var parameters = entity.GetPropertiesWithValues();
-            response.Data = await _unitOfWork.MedicalHistory.ExecAsync(StoreProcedures.uspMedicalHistoryEdit, parameters);
-            if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_UPDATE; }
-        }
-        catch (Exception ex) { response.IsSuccess = false; response.Message = ex.Message; }
+
+        var entity = _mapper.Map<Entity.MedicalHistory>(request);
+        var parameters = entity.GetPropertiesWithValues();
+        response.Data = await _unitOfWork.MedicalHistory.ExecAsync(StoreProcedures.uspMedicalHistoryEdit, parameters);
+        if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_UPDATE; }
+
         return response;
     }
 }

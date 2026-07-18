@@ -14,7 +14,7 @@ namespace Clinical.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class PatientDiagnosisController : ControllerBase
+    public class PatientDiagnosisController : ApiControllerBase
     {
         private readonly IMediator _mediator;
 
@@ -27,35 +27,35 @@ namespace Clinical.API.Controllers
         public async Task<IActionResult> List()
         {
             var response = await _mediator.Send(new GetAllDiagnosisQuery());
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpGet("{diagnosisId:int}")]
         public async Task<IActionResult> GetById(int diagnosisId)
         {
             var response = await _mediator.Send(new GetDiagnosisByIdQuery { DiagnosisId = diagnosisId });
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpGet("ByPatient/{patientId:int}")]
         public async Task<IActionResult> GetByPatient(int patientId)
         {
             var response = await _mediator.Send(new GetDiagnosesByPatientQuery { PatientId = patientId });
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpGet("ByAppointment/{appointmentId:int}")]
         public async Task<IActionResult> GetByAppointment(int appointmentId)
         {
             var response = await _mediator.Send(new GetDiagnosesByAppointmentQuery { AppointmentId = appointmentId });
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] CreateDiagnosisCommand command)
         {
             var response = await _mediator.Send(command);
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status201Created);
         }
 
         [HttpDelete("Remove/{diagnosisId:int}")]
@@ -63,14 +63,14 @@ namespace Clinical.API.Controllers
         public async Task<IActionResult> Remove(int diagnosisId)
         {
             var response = await _mediator.Send(new DeleteDiagnosisCommand { DiagnosisId = diagnosisId });
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
 
         [HttpPatch("ChangeState")]
         public async Task<IActionResult> ChangeState([FromBody] ChangeStateDiagnosisCommand command)
         {
             var response = await _mediator.Send(command);
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
     }
 }

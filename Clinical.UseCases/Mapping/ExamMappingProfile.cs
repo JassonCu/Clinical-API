@@ -6,6 +6,7 @@ using Clinical.UseCases.UseCases.Exam.Commands.CreateCommand;
 using Clinical.UseCases.UseCases.Exam.Commands.UpdateCommand;
 
 namespace Clinical.UseCases.Mapping;
+
 public class ExamMappingProfile : Profile
 {
     public ExamMappingProfile()

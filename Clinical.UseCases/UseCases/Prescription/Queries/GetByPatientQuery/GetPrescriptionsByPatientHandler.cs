@@ -18,12 +18,10 @@ namespace Clinical.UseCases.UseCases.Prescription.Queries.GetByPatientQuery
         public async Task<BaseResponse<IEnumerable<GetAllPrescriptionResponseDto>>> Handle(GetPrescriptionsByPatientQuery request, CancellationToken cancellationToken)
         {
             var response = new BaseResponse<IEnumerable<GetAllPrescriptionResponseDto>>();
-            try
-            {
-                var results = await _prescriptionRepository.GetPrescriptionsByPatient(StoreProcedures.uspPrescriptionByPatient, new { request.PatientId });
-                if (results is not null) { response.IsSuccess = true; response.Data = results; response.Message = GlobalMessage.MESSAGE_QUERY; }
-            }
-            catch (Exception ex) { response.Message = ex.Message; }
+
+            var results = await _prescriptionRepository.GetPrescriptionsByPatient(StoreProcedures.uspPrescriptionByPatient, new { request.PatientId });
+            if (results is not null) { response.IsSuccess = true; response.Data = results; response.Message = GlobalMessage.MESSAGE_QUERY; }
+
             return response;
         }
     }

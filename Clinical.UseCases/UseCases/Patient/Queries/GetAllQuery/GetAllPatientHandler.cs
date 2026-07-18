@@ -22,20 +22,13 @@ public class GetAllPatientHandler : IRequestHandler<GetAllPatientQuery, BaseResp
     {
         var response = new BaseResponse<IEnumerable<GetAllPatientResponseDto>>();
 
-        try
-        {
-            var patients = await _unitOfWork.Patient.GetAllAsync(StoreProcedures.uspPatientList);
+        var patients = await _unitOfWork.Patient.GetAllAsync(StoreProcedures.uspPatientList);
 
-            if (patients is not null)
-            {
-                response.IsSuccess = true;
-                response.Data = _mapper.Map<IEnumerable<GetAllPatientResponseDto>>(patients);
-                response.Message = GlobalMessage.MESSAGE_QUERY;
-            }
-        }
-        catch (Exception ex)
+        if (patients is not null)
         {
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Data = _mapper.Map<IEnumerable<GetAllPatientResponseDto>>(patients);
+            response.Message = GlobalMessage.MESSAGE_QUERY;
         }
 
         return response;

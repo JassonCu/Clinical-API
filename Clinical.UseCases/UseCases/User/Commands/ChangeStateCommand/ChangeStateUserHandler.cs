@@ -18,19 +18,11 @@ namespace Clinical.UseCases.UseCases.User.Commands.ChangeStateCommand
         {
             var response = new BaseResponse<bool>();
 
-            try
-            {
-                await _userRepository.ChangeUserStateAsync(request.UserId, request.State);
+            await _userRepository.ChangeUserStateAsync(request.UserId, request.State);
 
-                response.IsSuccess = true;
-                response.Data = true;
-                response.Message = GlobalMessage.MESSAGE_UPDATE_STATE;
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Message = ex.Message;
-            }
+            response.IsSuccess = true;
+            response.Data = true;
+            response.Message = GlobalMessage.MESSAGE_UPDATE_STATE;
 
             return response;
         }

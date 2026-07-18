@@ -22,14 +22,12 @@ namespace Clinical.UseCases.UseCases.Prescription.Commands.ChangeStateCommand
         public async Task<BaseResponse<bool>> Handle(ChangeStatePrescriptionCommand request, CancellationToken cancellationToken)
         {
             var response = new BaseResponse<bool>();
-            try
-            {
-                var entity = _mapper.Map<Entity.Prescription>(request);
-                var parameters = entity.GetPropertiesWithValues();
-                response.Data = await _unitOfWork.Prescription.ExecAsync(StoreProcedures.uspPrescriptionChangeState, parameters);
-                if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_UPDATE; }
-            }
-            catch (Exception ex) { response.Message = ex.Message; }
+
+            var entity = _mapper.Map<Entity.Prescription>(request);
+            var parameters = entity.GetPropertiesWithValues();
+            response.Data = await _unitOfWork.Prescription.ExecAsync(StoreProcedures.uspPrescriptionChangeState, parameters);
+            if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_UPDATE; }
+
             return response;
         }
     }

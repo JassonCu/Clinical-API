@@ -18,20 +18,14 @@ public class DeleteAnalysisHandler : IRequestHandler<DeleteAnalysisCommand, Base
     {
         var response = new BaseResponse<bool>();
 
-        try
-        {
-            response.Data = await _unitOfWork.Analysis.ExecAsync(StoreProcedures.uspAnalysisRemove, request);
+        response.Data = await _unitOfWork.Analysis.ExecAsync(StoreProcedures.uspAnalysisRemove, request);
 
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = GlobalMessage.MESSAGE_DELETE;
-            }
-        }
-        catch (Exception ex)
+        if (response.Data)
         {
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Message = GlobalMessage.MESSAGE_DELETE;
         }
+
         return response;
     }
 }

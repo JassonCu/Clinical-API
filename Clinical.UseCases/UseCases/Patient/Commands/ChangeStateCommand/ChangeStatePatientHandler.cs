@@ -23,21 +23,14 @@ public class ChangeStatePatientHandler : IRequestHandler<ChangeStatePatientComma
     {
         var response = new BaseResponse<bool>();
 
-        try
-        {
-            var patient = _mapper.Map<Entity.Patient>(request);
-            var parameters = patient.GetPropertiesWithValues();
-            response.Data = await _unitOfWork.Patient.ExecAsync(StoreProcedures.uspPatientChangeState, parameters);
+        var patient = _mapper.Map<Entity.Patient>(request);
+        var parameters = patient.GetPropertiesWithValues();
+        response.Data = await _unitOfWork.Patient.ExecAsync(StoreProcedures.uspPatientChangeState, parameters);
 
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = GlobalMessage.MESSAGE_UPDATE_STATE;
-            }
-        }
-        catch (Exception ex)
+        if (response.Data)
         {
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Message = GlobalMessage.MESSAGE_UPDATE_STATE;
         }
 
         return response;

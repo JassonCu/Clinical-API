@@ -23,23 +23,16 @@ public class ChangeStateAppointmentHandler : IRequestHandler<ChangeStateAppointm
     {
         var response = new BaseResponse<bool>();
 
-        try
-        {
-            var appointment = _mapper.Map<Entity.Appointment>(request);
-            var parameters = appointment.GetPropertiesWithValues();
-            response.Data = await _unitOfWork.Appointment.ExecAsync(StoreProcedures.uspAppointmentChangeState, parameters);
+        var appointment = _mapper.Map<Entity.Appointment>(request);
+        var parameters = appointment.GetPropertiesWithValues();
+        response.Data = await _unitOfWork.Appointment.ExecAsync(StoreProcedures.uspAppointmentChangeState, parameters);
 
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = GlobalMessage.MESSAGE_UPDATE_STATE;
-            }
-        }
-        catch (Exception ex)
+        if (response.Data)
         {
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Message = GlobalMessage.MESSAGE_UPDATE_STATE;
         }
-        
+
         return response;
     }
 }

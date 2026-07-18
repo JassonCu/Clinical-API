@@ -7,7 +7,7 @@ namespace Clinical.Infraestructure.Extensions
     {
         public static IServiceCollection AddInyectionInfrastructure(this IServiceCollection services)
         {
-            services.AddSingleton<JwtTokenService>();
+            services.AddSingleton<IJwtTokenService, JwtTokenService>();
             return services;
         }
     }

@@ -19,20 +19,13 @@ public class GetExamResultsByPatientHandler : IRequestHandler<GetExamResultsByPa
     {
         var response = new BaseResponse<IEnumerable<GetAllExamResultResponseDto>>();
 
-        try
-        {
-            var results = await _examResultRepository.GetExamResultsByPatient(StoreProcedures.uspExamResultByPatient, request);
+        var results = await _examResultRepository.GetExamResultsByPatient(StoreProcedures.uspExamResultByPatient, request);
 
-            if (results is not null)
-            {
-                response.IsSuccess = true;
-                response.Data = results;
-                response.Message = GlobalMessage.MESSAGE_QUERY;
-            }
-        }
-        catch (Exception ex)
+        if (results is not null)
         {
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Data = results;
+            response.Message = GlobalMessage.MESSAGE_QUERY;
         }
 
         return response;

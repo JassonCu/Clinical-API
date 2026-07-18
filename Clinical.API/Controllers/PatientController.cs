@@ -13,7 +13,7 @@ namespace Clinical.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class PatientController : ControllerBase
+    public class PatientController : ApiControllerBase
     {
         private readonly IMediator _mediator;
 
@@ -26,42 +26,42 @@ namespace Clinical.API.Controllers
         public async Task<IActionResult> ListPatients()
         {
             var response = await _mediator.Send(new GetAllPatientQuery());
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpGet("{patientId:int}")]
         public async Task<IActionResult> GetPatientById(int patientId)
         {
             var response = await _mediator.Send(new GetPatientByIdQuery() { PatientId = patientId });
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterPatient([FromBody] CreatePatientCommand command)
         {
             var response = await _mediator.Send(command);
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status201Created);
         }
 
         [HttpPut("Edit")]
         public async Task<IActionResult> EditPatient([FromBody] UpdatePatientCommand command)
         {
             var response = await _mediator.Send(command);
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
 
         [HttpDelete("Remove/{patientId:int}")]
         public async Task<IActionResult> RemovePatient(int patientId)
         {
             var response = await _mediator.Send(new DeletePatientCommand() { PatientId = patientId });
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
 
         [HttpPatch("ChangeState")]
         public async Task<IActionResult> ChangeState([FromBody] ChangeStatePatientCommand command)
         {
             var response = await _mediator.Send(command);
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
     }
 }

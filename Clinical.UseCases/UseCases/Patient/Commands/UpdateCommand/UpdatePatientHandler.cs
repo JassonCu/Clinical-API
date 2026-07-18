@@ -23,22 +23,14 @@ public class UpdatePatientHandler : IRequestHandler<UpdatePatientCommand, BaseRe
     {
         var response = new BaseResponse<bool>();
 
-        try
-        {
-            var patient = _mapper.Map<Entity.Patient>(request);
-            var parameters = patient.GetPropertiesWithValues();
-            response.Data = await _unitOfWork.Patient.ExecAsync(StoreProcedures.uspPatientEdit, parameters);
+        var patient = _mapper.Map<Entity.Patient>(request);
+        var parameters = patient.GetPropertiesWithValues();
+        response.Data = await _unitOfWork.Patient.ExecAsync(StoreProcedures.uspPatientEdit, parameters);
 
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = GlobalMessage.MESSAGE_UPDATE;
-            }
-        }
-        catch (Exception ex)
+        if (response.Data)
         {
-            response.IsSuccess = false;
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Message = GlobalMessage.MESSAGE_UPDATE;
         }
 
         return response;

@@ -18,19 +18,12 @@ public class DeleteDoctorHandler : IRequestHandler<DeleteDoctorCommand, BaseResp
     {
         var response = new BaseResponse<bool>();
 
-        try
-        {
-            response.Data = await _unitOfWork.Doctor.ExecAsync(StoreProcedures.uspDoctorRemove, request);
+        response.Data = await _unitOfWork.Doctor.ExecAsync(StoreProcedures.uspDoctorRemove, request);
 
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = GlobalMessage.MESSAGE_DELETE;
-            }
-        }
-        catch (Exception ex)
+        if (response.Data)
         {
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Message = GlobalMessage.MESSAGE_DELETE;
         }
 
         return response;

@@ -22,14 +22,12 @@ public class ChangeStateMedicineHandler : IRequestHandler<ChangeStateMedicineCom
     public async Task<BaseResponse<bool>> Handle(ChangeStateMedicineCommand request, CancellationToken cancellationToken)
     {
         var response = new BaseResponse<bool>();
-        try
-        {
-            var entity = _mapper.Map<Entity.Medicine>(request);
-            var parameters = entity.GetPropertiesWithValues();
-            response.Data = await _unitOfWork.Medicine.ExecAsync(StoreProcedures.uspMedicineChangeState, parameters);
-            if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_UPDATE_STATE; }
-        }
-        catch (Exception ex) { response.Message = ex.Message; }
+
+        var entity = _mapper.Map<Entity.Medicine>(request);
+        var parameters = entity.GetPropertiesWithValues();
+        response.Data = await _unitOfWork.Medicine.ExecAsync(StoreProcedures.uspMedicineChangeState, parameters);
+        if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_UPDATE_STATE; }
+
         return response;
     }
 }

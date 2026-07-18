@@ -6,41 +6,33 @@ using Clinical.Utils.HelperExtensions;
 using MediatR;
 using Entity = Clinical.Domain.Entities;
 
-namespace Clinical.UseCases.UseCases.Analysis.Commands.UpdateCommand
+namespace Clinical.UseCases.UseCases.Analysis.Commands.UpdateCommand;
+
+public class UpdateAnalysisHandler : IRequestHandler<UpdateAnalysisCommand, BaseResponse<bool>>
 {
-    public class UpdateAnalysisHandler : IRequestHandler<UpdateAnalysisCommand, BaseResponse<bool>>
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+
+    public UpdateAnalysisHandler(IMapper mapper, IUnitOfWork unitOfWork)
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
+        _mapper = mapper;
+        _unitOfWork = unitOfWork;
+    }
 
-        public UpdateAnalysisHandler(IMapper mapper, IUnitOfWork unitOfWork)
+    public async Task<BaseResponse<bool>> Handle(UpdateAnalysisCommand request, CancellationToken cancellationToken)
+    {
+        var response = new BaseResponse<bool>();
+
+        var analysis = _mapper.Map<Entity.Analysis>(request);
+        var parameters = analysis.GetPropertiesWithValues();
+        response.Data = await _unitOfWork.Analysis.ExecAsync(StoreProcedures.uspAnalysisEdit, parameters);
+
+        if (response.Data)
         {
-            _mapper = mapper;
-            _unitOfWork = unitOfWork;
+            response.IsSuccess = true;
+            response.Message = GlobalMessage.MESSAGE_UPDATE;
         }
 
-        public async Task<BaseResponse<bool>> Handle(UpdateAnalysisCommand request, CancellationToken cancellationToken)
-        {
-            var response = new BaseResponse<bool>();
-
-            try
-            {
-                var analysis = _mapper.Map<Entity.Analysis>(request);
-                var parameters = analysis.GetPropertiesWithValues();
-                response.Data = await _unitOfWork.Analysis.ExecAsync(StoreProcedures.uspAnalysisEdit, parameters);
-
-                if (response.Data)
-                {
-                    response.IsSuccess = true;
-                    response.Message = GlobalMessage.MESSAGE_UPDATE;
-                }
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Message = ex.Message;
-            }
-            return response;
-        }
+        return response;
     }
 }

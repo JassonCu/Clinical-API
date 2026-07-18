@@ -78,6 +78,7 @@ try
     });
 
     builder.Services.AddControllers();
+    builder.Services.AddProblemDetails();
     builder.Services.AddOpenApi();
 
     builder.Services.AddInyectionInfrastructure();

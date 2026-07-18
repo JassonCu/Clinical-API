@@ -19,20 +19,13 @@ public class GetAllExamHandler : IRequestHandler<GetAllExamQuery, BaseResponse<I
     {
         var response = new BaseResponse<IEnumerable<GetAllExamResponseDto>>();
 
-        try
-        {
-            var exams = await _examRepository.GetAllExam(StoreProcedures.uspExamList);
+        var exams = await _examRepository.GetAllExam(StoreProcedures.uspExamList);
 
-            if (exams is not null)
-            {
-                response.IsSuccess = true;
-                response.Data = exams;
-                response.Message = GlobalMessage.MESSAGE_QUERY;
-            }
-        }
-        catch (Exception ex)
+        if (exams is not null)
         {
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Data = exams;
+            response.Message = GlobalMessage.MESSAGE_QUERY;
         }
 
         return response;

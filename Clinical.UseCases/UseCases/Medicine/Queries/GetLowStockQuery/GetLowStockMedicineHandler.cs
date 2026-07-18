@@ -21,12 +21,10 @@ public class GetLowStockMedicineHandler : IRequestHandler<GetLowStockMedicineQue
     public async Task<BaseResponse<IEnumerable<GetAllMedicineResponseDto>>> Handle(GetLowStockMedicineQuery request, CancellationToken cancellationToken)
     {
         var response = new BaseResponse<IEnumerable<GetAllMedicineResponseDto>>();
-        try
-        {
-            var entities = await _unitOfWork.Medicine.GetAllAsync(StoreProcedures.uspMedicineLowStock);
-            if (entities is not null) { response.IsSuccess = true; response.Data = _mapper.Map<IEnumerable<GetAllMedicineResponseDto>>(entities); response.Message = GlobalMessage.MESSAGE_QUERY; }
-        }
-        catch (Exception ex) { response.Message = ex.Message; }
+
+        var entities = await _unitOfWork.Medicine.GetAllAsync(StoreProcedures.uspMedicineLowStock);
+        if (entities is not null) { response.IsSuccess = true; response.Data = _mapper.Map<IEnumerable<GetAllMedicineResponseDto>>(entities); response.Message = GlobalMessage.MESSAGE_QUERY; }
+
         return response;
     }
 }

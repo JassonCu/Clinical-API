@@ -13,7 +13,7 @@ namespace Clinical.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class AnalysisController : ControllerBase
+    public class AnalysisController : ApiControllerBase
     {
         private readonly IMediator _mediator;
 
@@ -27,7 +27,7 @@ namespace Clinical.API.Controllers
         {
             var response = await _mediator.Send(new GetAllAnalysisQuery());
 
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpGet("{analysisId:int}")]
@@ -35,7 +35,7 @@ namespace Clinical.API.Controllers
         {
             var response = await _mediator.Send(new GetAnalysisByIdQuery() { AnalysisId = analysisId });
 
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpPost("Register")]
@@ -43,7 +43,7 @@ namespace Clinical.API.Controllers
         {
             var response = await _mediator.Send(command);
 
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status201Created);
         }
 
         [HttpPut("Edit")]
@@ -51,7 +51,7 @@ namespace Clinical.API.Controllers
         {
             var response = await _mediator.Send(command);
             
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
 
         [HttpDelete ("Remove/{analysisId:int}")]
@@ -59,7 +59,7 @@ namespace Clinical.API.Controllers
         {
             var response = await _mediator.Send(new DeleteAnalysisCommand() { AnalysisId = analysisId });
 
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
 
         [HttpPatch ("ChangeState")]
@@ -67,7 +67,7 @@ namespace Clinical.API.Controllers
         {
             var response = await _mediator.Send(command);
 
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
     }
 }

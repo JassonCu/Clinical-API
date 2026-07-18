@@ -21,12 +21,10 @@ namespace Clinical.UseCases.UseCases.PatientDiagnosis.Queries.GetByAppointmentQu
         public async Task<BaseResponse<IEnumerable<GetAllDiagnosisResponseDto>>> Handle(GetDiagnosesByAppointmentQuery request, CancellationToken cancellationToken)
         {
             var response = new BaseResponse<IEnumerable<GetAllDiagnosisResponseDto>>();
-            try
-            {
-                var entities = await _unitOfWork.PatientDiagnosis.GetAllAsync(StoreProcedures.uspDiagnosisByAppointment, new { AppointmentId = request.AppointmentId });
-                if (entities is not null) { response.IsSuccess = true; response.Data = _mapper.Map<IEnumerable<GetAllDiagnosisResponseDto>>(entities); response.Message = GlobalMessage.MESSAGE_QUERY; }
-            }
-            catch (Exception ex) { response.Message = ex.Message; }
+
+            var entities = await _unitOfWork.PatientDiagnosis.GetAllAsync(StoreProcedures.uspDiagnosisByAppointment, new { AppointmentId = request.AppointmentId });
+            if (entities is not null) { response.IsSuccess = true; response.Data = _mapper.Map<IEnumerable<GetAllDiagnosisResponseDto>>(entities); response.Message = GlobalMessage.MESSAGE_QUERY; }
+
             return response;
         }
     }

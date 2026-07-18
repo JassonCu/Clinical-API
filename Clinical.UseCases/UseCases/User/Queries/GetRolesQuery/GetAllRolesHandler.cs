@@ -19,20 +19,13 @@ namespace Clinical.UseCases.UseCases.User.Queries.GetRolesQuery
         {
             var response = new BaseResponse<IEnumerable<RoleDto>>();
 
-            try
-            {
-                var roles = await _userRepository.GetAllRolesAsync();
+            var roles = await _userRepository.GetAllRolesAsync();
 
-                if (roles is not null)
-                {
-                    response.IsSuccess = true;
-                    response.Data = roles;
-                    response.Message = GlobalMessage.MESSAGE_QUERY;
-                }
-            }
-            catch (Exception ex)
+            if (roles is not null)
             {
-                response.Message = ex.Message;
+                response.IsSuccess = true;
+                response.Data = roles;
+                response.Message = GlobalMessage.MESSAGE_QUERY;
             }
 
             return response;

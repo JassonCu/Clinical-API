@@ -23,21 +23,14 @@ public class ChangeStateAnalysisHandler : IRequestHandler<ChangeStateAnalysisCom
     {
         var response = new BaseResponse<bool>();
 
-        try
-        {
-            var analysis = _mapper.Map<Entity.Analysis>(request);
-            var parameters = analysis.GetPropertiesWithValues();
-            response.Data = await _unitOfWork.Analysis.ExecAsync(StoreProcedures.uspAnalysisChangeState, parameters);
+        var analysis = _mapper.Map<Entity.Analysis>(request);
+        var parameters = analysis.GetPropertiesWithValues();
+        response.Data = await _unitOfWork.Analysis.ExecAsync(StoreProcedures.uspAnalysisChangeState, parameters);
 
-            if(response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = GlobalMessage.MESSAGE_UPDATE;
-            }
-        }
-        catch (Exception ex)
+        if (response.Data)
         {
-            response.Message = ex.Message;
+            response.IsSuccess = true;
+            response.Message = GlobalMessage.MESSAGE_UPDATE;
         }
 
         return response;

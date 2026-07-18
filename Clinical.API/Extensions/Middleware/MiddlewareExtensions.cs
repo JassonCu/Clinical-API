@@ -4,7 +4,7 @@
     {
         public static IApplicationBuilder AddMiddleware(this IApplicationBuilder builder)
         {
-            return builder.UseMiddleware<ValidationMiddleware>();
+            return builder.UseMiddleware<ExceptionHandlingMiddleware>();
         }
     }
 }

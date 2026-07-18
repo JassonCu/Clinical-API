@@ -11,7 +11,7 @@ namespace Clinical.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class VitalSignController : ControllerBase
+    public class VitalSignController : ApiControllerBase
     {
         private readonly IMediator _mediator;
 
@@ -24,21 +24,21 @@ namespace Clinical.API.Controllers
         public async Task<IActionResult> List()
         {
             var response = await _mediator.Send(new GetAllVitalSignQuery());
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpGet("ByPatient/{patientId:int}")]
         public async Task<IActionResult> GetByPatient(int patientId)
         {
             var response = await _mediator.Send(new GetVitalSignsByPatientQuery { PatientId = patientId });
-            return Ok(response);
+            return DataResult(response);
         }
 
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] CreateVitalSignCommand command)
         {
             var response = await _mediator.Send(command);
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status201Created);
         }
 
         [HttpDelete("Remove/{vitalSignId:int}")]
@@ -46,7 +46,7 @@ namespace Clinical.API.Controllers
         public async Task<IActionResult> Remove(int vitalSignId)
         {
             var response = await _mediator.Send(new DeleteVitalSignCommand { VitalSignId = vitalSignId });
-            return Ok(response);
+            return CommandResult(response, StatusCodes.Status204NoContent);
         }
     }
 }
