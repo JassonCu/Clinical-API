@@ -1,0 +1,55 @@
+version: '3.4'
+
+services:
+  clinicalapi:
+    image: clinicalapi
+    build:
+      context: .
+      dockerfile: Clinical.API/Dockerfile
+    ports:
+      - "5123:5123"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__ClinicalConnection: "Server=sqlserver;Database=Clinical;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=true"
+      JwtSettings__SecretKey: "${JWT_SECRET_KEY}"
+      JwtSettings__Issuer: "ClinicalAPI"
+      JwtSettings__Audience: "ClinicalAPIClients"
+      JwtSettings__AccessTokenExpiryMinutes: "15"
+      JwtSettings__RefreshTokenExpiryDays: "7"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  clinicalweb:
+    image: clinicalweb
+    build:
+      context: .
+      dockerfile: Clinical.Web/Dockerfile
+    ports:
+      - "5124:5124"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ApiSettings__BaseUrl: "http://clinicalapi:5123"
+    depends_on:
+      - clinicalapi
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: clinical_sqlserver
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "${SA_PASSWORD:-PasswordO1.}"
+      MSSQL_PID: Express
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"${SA_PASSWORD:-PasswordO1.}\" -Q 'SELECT 1' -No || exit 1"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+      timeout: 5s
+
+volumes:
+  sqlserver_data:
