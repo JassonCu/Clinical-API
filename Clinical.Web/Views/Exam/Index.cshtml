@@ -1,0 +1,33 @@
+@model IEnumerable<Clinical.Web.Core.DTOs.Exam.ExamListDto>
+@{
+    ViewData["Title"] = "Exámenes";
+}
+<div class="d-flex justify-content-end mb-3">
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Nuevo examen</a>
+</div>
+<div class="table-card">
+    <div class="table-header"><h6><i class="bi bi-eyedropper me-2 text-primary"></i>Catálogo de Exámenes</h6><span class="badge bg-primary">@Model.Count()</span></div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" data-datatable>
+            <thead><tr><th>#</th><th>Nombre</th><th>Análisis</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead>
+            <tbody>
+                @foreach (var e in Model)
+                {
+                    <tr>
+                        <td class="text-muted">@e.ExamId</td>
+                        <td class="fw-semibold">@e.Name</td>
+                        <td><span class="badge bg-light text-dark">@e.Analysis</span></td>
+                        <td><span class="badge badge-state badge-active">@e.StateExam</span></td>
+                        <td>@e.AuditCreateDate.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            <form asp-action="Delete" asp-route-id="@e.ExamId" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar el examen @e.Name?"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,43 @@
+@model IEnumerable<Clinical.Web.Core.DTOs.Appointment.AppointmentListDto>
+@{
+    ViewData["Title"] = "Citas";
+}
+<div class="d-flex justify-content-end mb-3">
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Nueva cita</a>
+</div>
+<div class="table-card">
+    <div class="table-header">
+        <h6><i class="bi bi-calendar2-check me-2 text-primary"></i>Listado de Citas</h6>
+        <span class="badge bg-primary">@Model.Count()</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" data-datatable>
+            <thead>
+                <tr><th>Paciente</th><th>Médico</th><th>Especialidad</th><th>Fecha</th><th>Motivo</th><th>Estado</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@a.PatientFullName</td>
+                        <td>@a.DoctorFullName</td>
+                        <td><span class="badge bg-light text-dark">@a.DoctorSpecialty</span></td>
+                        <td>@a.AppointmentDate.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="text-truncate mw-col-sm" title="@a.Reason">@a.Reason</td>
+                        <td><span class="badge badge-state badge-active">@a.StateAppointment</span></td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a asp-action="Details" asp-route-id="@a.AppointmentId" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Edit" asp-route-id="@a.AppointmentId" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <form asp-action="Delete" asp-route-id="@a.AppointmentId" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar esta cita?"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

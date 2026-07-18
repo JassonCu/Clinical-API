@@ -1,0 +1,117 @@
+@model IEnumerable<Clinical.Web.Core.DTOs.User.UserListDto>
+@{
+    ViewData["Title"] = "Usuarios";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div></div>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-person-plus me-2"></i>Nuevo usuario
+    </a>
+</div>
+
+<div class="table-card">
+    <div class="table-header">
+        <h6><i class="bi bi-people-fill me-2 text-primary"></i>Listado de Usuarios</h6>
+        <span class="badge bg-primary">@Model.Count()</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" data-datatable>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nombre completo</th>
+                    <th>Usuario</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model)
+                {
+                    <tr>
+                        <td class="text-muted">@u.UserId</td>
+                        <td class="fw-semibold">@u.FirstName @u.LastName</td>
+                        <td>@u.Username</td>
+                        <td>@u.Email</td>
+                        <td>@u.RoleName</td>
+                        <td>
+                            <span class="badge badge-state @(u.State == 1 ? "badge-active" : "badge-inactive")">
+                                @(u.State == 1 ? "Activo" : "Inactivo")
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a asp-action="Edit" asp-route-id="@u.UserId" class="btn btn-sm btn-outline-primary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="ChangeState" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@u.UserId" />
+                                    <input type="hidden" name="state" value="@(u.State == 1 ? 0 : 1)" />
+                                    <button type="button"
+                                            class="btn btn-sm @(u.State == 1 ? "btn-outline-warning" : "btn-outline-success")"
+                                            data-confirm="@(u.State == 1 ? $"¿Desactivar al usuario {u.Username}?" : $"¿Activar al usuario {u.Username}?")"
+                                            title="@(u.State == 1 ? "Desactivar" : "Activar")">
+                                        <i class="bi @(u.State == 1 ? "bi-toggle-on" : "bi-toggle-off")"></i>
+                                    </button>
+                                </form>
+                                <form asp-action="GenerateResetToken" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@u.UserId" />
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-info"
+                                            data-confirm="¿Generar token de recuperación para @u.Username? El token anterior quedará invalidado."
+                                            data-confirm-action="this.closest('form').submit()"
+                                            title="Generar token de recuperación">
+                                        <i class="bi bi-key"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@if (TempData["ResetToken"] is string token)
+{
+    <div class="modal fade" id="tokenModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="bi bi-key-fill me-2"></i>Token de recuperación generado</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning d-flex gap-2">
+                        <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+                        <div>
+                            <strong>Token de un solo uso.</strong> Cópielo ahora y entréguelo al usuario <strong>@TempData["ResetTokenUser"]</strong> por un canal seguro. Vence el <strong>@TempData["ResetTokenExpiry"]</strong>.
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="tokenValue" class="form-control font-monospace small" value="@token" readonly>
+                        <button class="btn btn-outline-secondary" id="copyBtn" title="Copiar">
+                            <i class="bi bi-clipboard" id="copyIcon"></i>
+                        </button>
+                    </div>
+                    <p class="text-muted small mt-2 mb-0">
+                        El usuario debe ir a <code>/Auth/ResetPassword</code> y pegar este token para establecer su nueva contraseña.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+@section Scripts {
+    <script src="~/js/token-modal.js"></script>
+}

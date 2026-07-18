@@ -1,0 +1,32 @@
+@model IEnumerable<Clinical.Web.Core.DTOs.VitalSign.VitalSignDto>
+@{
+    ViewData["Title"] = "Signos Vitales del Paciente";
+}
+<div class="mb-3 d-flex gap-2">
+    <a asp-controller="Patient" asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Pacientes</a>
+    <a asp-action="Create" class="btn btn-sm btn-primary"><i class="bi bi-plus me-1"></i>Registrar</a>
+</div>
+<div class="table-card">
+    <div class="table-header"><h6><i class="bi bi-heart-pulse me-2 text-primary"></i>Historial de Signos Vitales</h6></div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" data-datatable>
+            <thead><tr><th>Fecha</th><th>Peso</th><th>IMC</th><th>PA</th><th>FC</th><th>Temp.</th><th>SpO₂</th><th>Glucemia</th><th>Notas</th></tr></thead>
+            <tbody>
+                @foreach (var v in Model.OrderByDescending(x => x.MeasuredAt))
+                {
+                    <tr>
+                        <td>@v.MeasuredAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@(v.Weight.HasValue ? $"{v.Weight} kg" : "–")</td>
+                        <td>@(v.Bmi.HasValue ? v.Bmi.Value.ToString("N1") : "–")</td>
+                        <td>@(v.BloodPressureSystolic.HasValue ? $"{v.BloodPressureSystolic}/{v.BloodPressureDiastolic}" : "–")</td>
+                        <td>@(v.HeartRate.HasValue ? $"{v.HeartRate} lpm" : "–")</td>
+                        <td>@(v.Temperature.HasValue ? $"{v.Temperature}°C" : "–")</td>
+                        <td>@(v.OxygenSaturation.HasValue ? $"{v.OxygenSaturation}%" : "–")</td>
+                        <td>@(v.GlucoseLevel.HasValue ? $"{v.GlucoseLevel} mg/dL" : "–")</td>
+                        <td class="text-muted small">@(v.Notes ?? "–")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

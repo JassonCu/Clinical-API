@@ -1,0 +1,35 @@
+@model IEnumerable<Clinical.Web.Core.DTOs.Analysis.AnalysisListDto>
+@{
+    ViewData["Title"] = "Análisis";
+}
+<div class="d-flex justify-content-end mb-3">
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Nuevo análisis</a>
+</div>
+<div class="table-card">
+    <div class="table-header"><h6><i class="bi bi-flask me-2 text-primary"></i>Tipos de Análisis</h6><span class="badge bg-primary">@Model.Count()</span></div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" data-datatable>
+            <thead><tr><th>#</th><th>Nombre</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead>
+            <tbody>
+                @foreach (var a in Model)
+                {
+                    <tr>
+                        <td class="text-muted">@a.AnalysisId</td>
+                        <td class="fw-semibold">@a.Name</td>
+                        <td><span class="badge badge-state @(a.State == 1 ? "badge-active" : "badge-inactive")">@a.StateAnalysis</span></td>
+                        <td>@a.AuditCreateDate.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a asp-action="Edit" asp-route-id="@a.AnalysisId" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <form asp-action="Delete" asp-route-id="@a.AnalysisId" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar @a.Name?"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

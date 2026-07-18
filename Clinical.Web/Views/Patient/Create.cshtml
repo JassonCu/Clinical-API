@@ -1,0 +1,110 @@
+@model Clinical.Web.Core.DTOs.Patient.CreatePatientDto
+@{
+    ViewData["Title"] = "Nuevo Paciente";
+}
+
+<div class="mb-3">
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Volver
+    </a>
+</div>
+
+<div class="form-card">
+    <h5 class="fw-bold mb-4"><i class="bi bi-person-plus me-2 text-primary"></i>Registrar Paciente</h5>
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger small mb-3"></div>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label asp-for="DocumentType" class="form-label"></label>
+                <select asp-for="DocumentType" class="form-select">
+                    <option value="CC">Cédula de ciudadanía</option>
+                    <option value="TI">Tarjeta de identidad</option>
+                    <option value="CE">Cédula extranjería</option>
+                    <option value="PA">Pasaporte</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="DocumentNumber" class="form-label"></label>
+                <input asp-for="DocumentNumber" class="form-control">
+                <span asp-validation-for="DocumentNumber" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Gender" class="form-label"></label>
+                <select asp-for="Gender" class="form-select">
+                    <option value="">Seleccione...</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Femenino</option>
+                    <option value="O">Otro</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="FirstName" class="form-label"></label>
+                <input asp-for="FirstName" class="form-control">
+                <span asp-validation-for="FirstName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="LastName" class="form-label"></label>
+                <input asp-for="LastName" class="form-control">
+                <span asp-validation-for="LastName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" type="email">
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Phone" class="form-label"></label>
+                <input asp-for="Phone" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label asp-for="MobilePhone" class="form-label"></label>
+                <input asp-for="MobilePhone" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label asp-for="BirthDate" class="form-label"></label>
+                <input asp-for="BirthDate" class="form-control" type="date">
+            </div>
+            <div class="col-md-4">
+                <label asp-for="BloodType" class="form-label"></label>
+                <select asp-for="BloodType" class="form-select">
+                    <option value="">Seleccione...</option>
+                    @foreach (var bt in new[]{"A+","A-","B+","B-","AB+","AB-","O+","O-"})
+                    { <option>@bt</option> }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="City" class="form-label"></label>
+                <input asp-for="City" class="form-control">
+            </div>
+            <div class="col-12">
+                <label asp-for="Address" class="form-label"></label>
+                <input asp-for="Address" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label asp-for="InsuranceCompany" class="form-label"></label>
+                <input asp-for="InsuranceCompany" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label asp-for="InsuranceNumber" class="form-label"></label>
+                <input asp-for="InsuranceNumber" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label asp-for="EmergencyContactName" class="form-label"></label>
+                <input asp-for="EmergencyContactName" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label asp-for="EmergencyContactPhone" class="form-label"></label>
+                <input asp-for="EmergencyContactPhone" class="form-control">
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-floppy me-2"></i>Guardar
+            </button>
+        </div>
+    </form>
+</div>

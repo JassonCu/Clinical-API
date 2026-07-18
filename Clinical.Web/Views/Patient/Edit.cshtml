@@ -1,0 +1,69 @@
+@model Clinical.Web.Core.DTOs.Patient.UpdatePatientDto
+@{
+    ViewData["Title"] = "Editar Paciente";
+}
+
+<div class="mb-3">
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Volver
+    </a>
+</div>
+
+<div class="form-card">
+    <h5 class="fw-bold mb-4"><i class="bi bi-pencil-square me-2 text-primary"></i>Editar Paciente</h5>
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="PatientId">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger small mb-3"></div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="DocumentNumber" class="form-label"></label>
+                <input asp-for="DocumentNumber" class="form-control">
+                <span asp-validation-for="DocumentNumber" class="text-danger small"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="Gender" class="form-label"></label>
+                <select asp-for="Gender" class="form-select">
+                    <option value="">Seleccione...</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Femenino</option>
+                    <option value="O">Otro</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="BirthDate" class="form-label"></label>
+                <input asp-for="BirthDate" class="form-control" type="date">
+            </div>
+            <div class="col-md-6">
+                <label asp-for="FirstName" class="form-label"></label>
+                <input asp-for="FirstName" class="form-control">
+                <span asp-validation-for="FirstName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="LastName" class="form-label"></label>
+                <input asp-for="LastName" class="form-control">
+                <span asp-validation-for="LastName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" type="email">
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Phone" class="form-label"></label>
+                <input asp-for="Phone" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Address" class="form-label"></label>
+                <input asp-for="Address" class="form-control">
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-floppy me-2"></i>Guardar cambios
+            </button>
+        </div>
+    </form>
+</div>

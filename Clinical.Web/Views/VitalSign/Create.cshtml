@@ -1,0 +1,42 @@
+@model Clinical.Web.Core.DTOs.VitalSign.CreateVitalSignDto
+@{
+    ViewData["Title"] = "Registrar Signos Vitales";
+}
+<div class="mb-3"><a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Volver</a></div>
+<div class="form-card">
+    <h5 class="fw-bold mb-4"><i class="bi bi-heart-pulse me-2 text-primary"></i>Registrar Signos Vitales</h5>
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger small mb-3"></div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="PatientId" class="form-label"></label>
+                <select asp-for="PatientId" class="form-select" asp-items="ViewBag.Patients"><option value="">Seleccione...</option></select>
+                <span asp-validation-for="PatientId" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="MeasuredAt" class="form-label"></label>
+                <input asp-for="MeasuredAt" class="form-control" type="datetime-local">
+                <span asp-validation-for="MeasuredAt" class="text-danger small"></span>
+            </div>
+
+            <div class="col-12"><hr class="my-1"><small class="text-muted fw-semibold text-uppercase">ANTROPOMETRÍA</small></div>
+            <div class="col-md-3"><label asp-for="Weight" class="form-label"></label><div class="input-group"><input asp-for="Weight" class="form-control" type="number" step="0.1"><span class="input-group-text">kg</span></div></div>
+            <div class="col-md-3"><label asp-for="Height" class="form-label"></label><div class="input-group"><input asp-for="Height" class="form-control" type="number" step="0.01"><span class="input-group-text">m</span></div></div>
+
+            <div class="col-12"><hr class="my-1"><small class="text-muted fw-semibold text-uppercase">SIGNOS VITALES</small></div>
+            <div class="col-md-2"><label asp-for="BloodPressureSystolic" class="form-label"></label><div class="input-group"><input asp-for="BloodPressureSystolic" class="form-control" type="number"><span class="input-group-text">mmHg</span></div></div>
+            <div class="col-md-2"><label asp-for="BloodPressureDiastolic" class="form-label"></label><div class="input-group"><input asp-for="BloodPressureDiastolic" class="form-control" type="number"><span class="input-group-text">mmHg</span></div></div>
+            <div class="col-md-2"><label asp-for="HeartRate" class="form-label"></label><div class="input-group"><input asp-for="HeartRate" class="form-control" type="number"><span class="input-group-text">lpm</span></div></div>
+            <div class="col-md-2"><label asp-for="Temperature" class="form-label"></label><div class="input-group"><input asp-for="Temperature" class="form-control" type="number" step="0.1"><span class="input-group-text">°C</span></div></div>
+            <div class="col-md-2"><label asp-for="OxygenSaturation" class="form-label"></label><div class="input-group"><input asp-for="OxygenSaturation" class="form-control" type="number" step="0.1"><span class="input-group-text">%</span></div></div>
+            <div class="col-md-2"><label asp-for="RespiratoryRate" class="form-label"></label><div class="input-group"><input asp-for="RespiratoryRate" class="form-control" type="number"><span class="input-group-text">rpm</span></div></div>
+            <div class="col-md-3"><label asp-for="GlucoseLevel" class="form-label"></label><div class="input-group"><input asp-for="GlucoseLevel" class="form-control" type="number" step="0.1"><span class="input-group-text">mg/dL</span></div></div>
+            <div class="col-12"><label asp-for="Notes" class="form-label"></label><textarea asp-for="Notes" class="form-control" rows="2"></textarea></div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-floppy me-2"></i>Guardar</button>
+        </div>
+    </form>
+</div>

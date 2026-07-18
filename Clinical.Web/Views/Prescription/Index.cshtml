@@ -1,0 +1,36 @@
+@model IEnumerable<Clinical.Web.Core.DTOs.Prescription.PrescriptionListDto>
+@{
+    ViewData["Title"] = "Recetas Médicas";
+}
+<div class="d-flex justify-content-end mb-3">
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Nueva receta</a>
+</div>
+<div class="table-card">
+    <div class="table-header"><h6><i class="bi bi-file-medical me-2 text-primary"></i>Recetas Médicas</h6><span class="badge bg-primary">@Model.Count()</span></div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" data-datatable>
+            <thead><tr><th>Paciente</th><th>Médico</th><th>Fecha</th><th>Válida hasta</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@p.PatientFullName</td>
+                        <td>@p.DoctorFullName</td>
+                        <td>@p.PrescriptionDate.ToString("dd/MM/yyyy")</td>
+                        <td>@(p.ValidUntil?.ToString("dd/MM/yyyy") ?? "–")</td>
+                        <td><span class="badge badge-state badge-active">@p.StatePrescription</span></td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a asp-action="Details" asp-route-id="@p.PrescriptionId" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
+                                <form asp-action="Delete" asp-route-id="@p.PrescriptionId" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar esta receta?"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

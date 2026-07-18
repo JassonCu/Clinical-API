@@ -1,0 +1,30 @@
+@model IEnumerable<Clinical.Web.Core.DTOs.Medicine.MedicineListDto>
+@{
+    ViewData["Title"] = "Medicamentos con Stock Bajo";
+}
+<div class="mb-3"><a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Volver</a></div>
+<div class="alert alert-warning d-flex align-items-center gap-2">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <span>Se encontraron <strong>@Model.Count()</strong> medicamento(s) con stock por debajo del mínimo.</span>
+</div>
+<div class="table-card">
+    <div class="table-header"><h6><i class="bi bi-capsule me-2 text-warning"></i>Stock Crítico</h6></div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" data-datatable>
+            <thead><tr><th>Código</th><th>Nombre</th><th>Categoría</th><th>Stock actual</th><th>Stock mínimo</th><th>Déficit</th></tr></thead>
+            <tbody>
+                @foreach (var m in Model.OrderBy(x => x.CurrentStock))
+                {
+                    <tr class="@(m.CurrentStock == 0 ? "table-danger" : "table-warning")">
+                        <td class="font-monospace small">@m.Code</td>
+                        <td class="fw-semibold">@m.Name</td>
+                        <td>@m.Category</td>
+                        <td><span class="badge @(m.CurrentStock == 0 ? "bg-danger" : "bg-warning text-dark")">@m.CurrentStock</span></td>
+                        <td>@m.MinimumStock</td>
+                        <td><span class="text-danger fw-semibold">@(m.MinimumStock - m.CurrentStock)</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

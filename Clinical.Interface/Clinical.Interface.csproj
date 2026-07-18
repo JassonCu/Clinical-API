@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Clinical.Application.DTOS\Clinical.Application.DTOS.csproj" />
+    <ProjectReference Include="..\Clinical.Domain\Clinical.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

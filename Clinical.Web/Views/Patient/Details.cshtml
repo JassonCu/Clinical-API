@@ -1,0 +1,40 @@
+@model Clinical.Web.Core.DTOs.Patient.PatientDetailDto
+@{
+    ViewData["Title"] = "Detalle del Paciente";
+}
+
+<div class="mb-3 d-flex gap-2">
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Volver</a>
+    <a asp-action="Edit" asp-route-id="@Model.PatientId" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil me-1"></i>Editar</a>
+    <a asp-controller="VitalSign" asp-action="ByPatient" asp-route-patientId="@Model.PatientId" class="btn btn-sm btn-outline-info"><i class="bi bi-heart-pulse me-1"></i>Signos Vitales</a>
+    <a asp-controller="MedicalHistory" asp-action="ByPatient" asp-route-patientId="@Model.PatientId" class="btn btn-sm btn-outline-success"><i class="bi bi-journal-medical me-1"></i>Historial</a>
+    <a asp-controller="PatientAllergy" asp-action="ByPatient" asp-route-patientId="@Model.PatientId" class="btn btn-sm btn-outline-warning"><i class="bi bi-exclamation-triangle me-1"></i>Alergias</a>
+</div>
+
+<div class="form-card">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="entity-avatar">@Model.FirstName.FirstOrDefault()</div>
+        <div>
+            <h4 class="mb-0 fw-bold">@Model.FirstName @Model.LastName</h4>
+            <span class="badge @(Model.State == 1 ? "bg-success" : "bg-danger")">@(Model.State == 1 ? "Activo" : "Inactivo")</span>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        @{
+            void Field(string label, string? value) {
+                <div class="col-md-4">
+                    <div class="text-muted small fw-semibold text-uppercase ls-tight">@label</div>
+                    <div class="fw-semibold">@(string.IsNullOrEmpty(value) ? "–" : value)</div>
+                </div>
+            }
+        }
+        @{ Field("Documento", Model.DocumentNumber); }
+        @{ Field("Email", Model.Email); }
+        @{ Field("Teléfono", Model.Phone); }
+        @{ Field("Fecha de nacimiento", Model.BirthDate?.ToString("dd/MM/yyyy")); }
+        @{ Field("Género", Model.Gender); }
+        @{ Field("Dirección", Model.Address); }
+        @{ Field("Registrado el", Model.AuditCreateDate.ToString("dd/MM/yyyy")); }
+    </div>
+</div>

@@ -1,0 +1,41 @@
+@model IEnumerable<Clinical.Web.Core.DTOs.PatientAllergy.AllergyDto>
+@{
+    ViewData["Title"] = "Alergias de Pacientes";
+}
+<div class="d-flex justify-content-end mb-3">
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Registrar alergia</a>
+</div>
+<div class="table-card">
+    <div class="table-header"><h6><i class="bi bi-exclamation-triangle me-2 text-warning"></i>Registro de Alergias</h6><span class="badge bg-primary">@Model.Count()</span></div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" data-datatable>
+            <thead><tr><th>Paciente</th><th>Tipo</th><th>Alérgeno</th><th>Reacción</th><th>Severidad</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody>
+                @foreach (var a in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@a.PatientFullName</td>
+                        <td>@a.AllergenType</td>
+                        <td>@a.AllergenName</td>
+                        <td class="text-muted small">@(a.Reaction ?? "–")</td>
+                        <td>
+                            <span class="badge @(a.Severity == "Anafilaxia" ? "bg-danger" : a.Severity == "Grave" ? "bg-warning text-dark" : a.Severity == "Moderada" ? "bg-info text-dark" : "bg-light text-dark")">
+                                @a.Severity
+                            </span>
+                        </td>
+                        <td><span class="badge badge-state @(a.State == 1 ? "badge-active" : "badge-inactive")">@(a.State == 1 ? "Activa" : "Inactiva")</span></td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a asp-action="Edit" asp-route-id="@a.AllergyId" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <form asp-action="Delete" asp-route-id="@a.AllergyId" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar esta alergia?"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

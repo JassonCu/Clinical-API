@@ -1,0 +1,51 @@
+@model Clinical.Web.Core.DTOs.Prescription.CreatePrescriptionDto
+@{
+    ViewData["Title"] = "Nueva Receta";
+    var medicines = (IEnumerable<Clinical.Web.Core.DTOs.Medicine.MedicineListDto>)ViewBag.Medicines;
+}
+<div class="mb-3"><a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Volver</a></div>
+<div class="form-card">
+    <h5 class="fw-bold mb-4"><i class="bi bi-file-medical me-2 text-primary"></i>Crear Receta Médica</h5>
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger small mb-3"></div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-5">
+                <label asp-for="PatientId" class="form-label"></label>
+                <select asp-for="PatientId" class="form-select" asp-items="ViewBag.Patients"><option value="">Seleccione paciente...</option></select>
+            </div>
+            <div class="col-md-5">
+                <label asp-for="DoctorId" class="form-label"></label>
+                <select asp-for="DoctorId" class="form-select" asp-items="ViewBag.Doctors"><option value="">Seleccione médico...</option></select>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="PrescriptionDate" class="form-label"></label>
+                <input asp-for="PrescriptionDate" class="form-control" type="date">
+            </div>
+            <div class="col-md-3">
+                <label asp-for="ValidUntil" class="form-label"></label>
+                <input asp-for="ValidUntil" class="form-control" type="date">
+            </div>
+            <div class="col-12">
+                <label asp-for="Notes" class="form-label"></label>
+                <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-semibold mb-0"><i class="bi bi-capsule me-2"></i>Medicamentos prescritos</h6>
+            <button type="button" class="btn btn-sm btn-outline-primary"
+                    onclick="addPrescriptionRow(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(medicines.Select(m => new { m.MedicineId, m.Name, m.Concentration }))))">
+                <i class="bi bi-plus me-1"></i>Agregar medicamento
+            </button>
+        </div>
+        <div id="prescription-details" class="mb-3 border rounded p-3 bg-light">
+            <p class="text-muted text-center small mb-0">Haz clic en "Agregar medicamento" para añadir ítems a la receta.</p>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-floppy me-2"></i>Guardar receta</button>
+        </div>
+    </form>
+</div>

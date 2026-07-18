@@ -1,0 +1,30 @@
+@model IEnumerable<Clinical.Web.Core.DTOs.VitalSign.VitalSignDto>
+@{
+    ViewData["Title"] = "Signos Vitales";
+}
+<div class="d-flex justify-content-end mb-3">
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Registrar signos</a>
+</div>
+<div class="table-card">
+    <div class="table-header"><h6><i class="bi bi-heart-pulse me-2 text-primary"></i>Registro de Signos Vitales</h6></div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" data-datatable>
+            <thead><tr><th>Paciente</th><th>Fecha</th><th>Peso</th><th>PA</th><th>FC</th><th>Temp.</th><th>SpO₂</th><th>Glucemia</th></tr></thead>
+            <tbody>
+                @foreach (var v in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@v.PatientFullName</td>
+                        <td>@v.MeasuredAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@(v.Weight.HasValue ? $"{v.Weight} kg" : "–")</td>
+                        <td>@(v.BloodPressureSystolic.HasValue ? $"{v.BloodPressureSystolic}/{v.BloodPressureDiastolic}" : "–")</td>
+                        <td>@(v.HeartRate.HasValue ? $"{v.HeartRate} lpm" : "–")</td>
+                        <td>@(v.Temperature.HasValue ? $"{v.Temperature}°C" : "–")</td>
+                        <td>@(v.OxygenSaturation.HasValue ? $"{v.OxygenSaturation}%" : "–")</td>
+                        <td>@(v.GlucoseLevel.HasValue ? $"{v.GlucoseLevel} mg/dL" : "–")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

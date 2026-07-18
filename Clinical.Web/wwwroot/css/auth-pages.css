@@ -1,0 +1,44 @@
+/* Standalone auth/setup pages — Login, Setup, ResetPassword, ChangePassword */
+
+.auth-body {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d6a9f 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.auth-card,
+.setup-card {
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+}
+
+.auth-header {
+    background: linear-gradient(135deg, #1e3a5f, #2d6a9f);
+    border-radius: 16px 16px 0 0;
+}
+
+.auth-header-warning {
+    background: linear-gradient(135deg, #664d03, #997404);
+    border-radius: 16px 16px 0 0;
+}
+
+.setup-header {
+    background: linear-gradient(135deg, #1e3a5f, #2d6a9f);
+    border-radius: 16px 16px 0 0;
+}
+
+.step-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .85rem;
+    font-weight: 600;
+}
+
+.auth-container    { width: 100%; max-width: 420px; }
+.auth-container-md { width: 100%; max-width: 460px; }
+.setup-container   { width: 100%; max-width: 640px; }

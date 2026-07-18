@@ -1,0 +1,50 @@
+@model IEnumerable<Clinical.Web.Core.DTOs.Medicine.MedicineListDto>
+@{
+    ViewData["Title"] = "Medicamentos";
+}
+<div class="d-flex justify-content-between mb-3">
+    <a asp-action="LowStock" class="btn btn-outline-warning"><i class="bi bi-exclamation-triangle me-2"></i>Stock bajo</a>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Nuevo medicamento</a>
+</div>
+<div class="table-card">
+    <div class="table-header">
+        <h6><i class="bi bi-capsule me-2 text-primary"></i>Inventario de Medicamentos</h6>
+        <span class="badge bg-primary">@Model.Count()</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" data-datatable>
+            <thead>
+                <tr><th>Código</th><th>Nombre</th><th>Genérico</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Receta</th><th>Estado</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var m in Model)
+                {
+                    <tr class="@(m.IsLowStock ? "table-warning" : "")">
+                        <td class="font-monospace small">@m.Code</td>
+                        <td class="fw-semibold">@m.Name</td>
+                        <td class="text-muted small">@m.GenericName</td>
+                        <td><span class="badge bg-secondary">@m.Category</span></td>
+                        <td>
+                            <span class="badge @(m.CurrentStock == 0 ? "bg-danger" : m.IsLowStock ? "bg-warning text-dark" : "bg-success")">
+                                @m.CurrentStock / @m.MinimumStock
+                            </span>
+                        </td>
+                        <td>$@m.Price.ToString("N0")</td>
+                        <td>@(m.RequiresPrescription ? "<span class='badge bg-danger'>Sí</span>" : "<span class='badge bg-light text-muted'>No</span>")</td>
+                        <td><span class="badge badge-state @(m.State == 1 ? "badge-active" : "badge-inactive")">@m.StateMedicine</span></td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a asp-action="Details" asp-route-id="@m.MedicineId" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Edit" asp-route-id="@m.MedicineId" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <form asp-action="Delete" asp-route-id="@m.MedicineId" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar @m.Name?"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
