@@ -87,6 +87,10 @@ public class ResetPasswordDto
 
 public class ChangePasswordDto
 {
+    [Required(ErrorMessage = "La contraseña actual es requerida")]
+    [DataType(DataType.Password)]
+    [Display(Name = "Contraseña actual")] public string CurrentPassword { get; set; } = string.Empty;
+
     [Required(ErrorMessage = "La contraseña es requerida")]
     [MinLength(8, ErrorMessage = "Mínimo 8 caracteres")]
     [DataType(DataType.Password)]

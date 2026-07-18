@@ -16,8 +16,6 @@ public class AuthController : Controller
     private readonly ISetupService _setupService;
     private readonly ILogger<AuthController> _logger;
 
-    private int CurrentUserId => int.TryParse(User.FindFirstValue("user_id"), out var id) ? id : 0;
-
     public AuthController(IAuthService authService, ISetupService setupService, ILogger<AuthController> logger)
     {
         _authService = authService;
@@ -119,8 +117,7 @@ public class AuthController : Controller
     public async Task<IActionResult> ChangePassword(ChangePasswordDto model)
     {
         if (!ModelState.IsValid) return View(model);
-        var userId = CurrentUserId;
-        var (success, error) = await _authService.ChangePasswordAsync(userId, model.NewPassword);
+        var (success, error) = await _authService.ChangePasswordAsync(model.CurrentPassword, model.NewPassword);
         if (success)
         {
             // Refresh authentication to clear must_change_password

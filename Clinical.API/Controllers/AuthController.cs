@@ -44,5 +44,8 @@ public class AuthController : ApiControllerBase
     [HttpPost("change-password")]
     [Authorize]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
-        => CommandResult(await _mediator.Send(command), StatusCodes.Status200OK);
+    {
+        command.Username = CurrentUsername; // identity from the token; the body cannot target another account
+        return CommandResult(await _mediator.Send(command), StatusCodes.Status200OK);
+    }
 }

@@ -8,5 +8,5 @@ public interface IAuthService
     Task<AuthResponseDto?> RefreshTokenAsync(string refreshToken);
     Task<bool> RegisterAsync(RegisterRequestDto request);
     Task<(bool Success, string? Error)> ResetPasswordAsync(ResetPasswordDto dto);
-    Task<(bool Success, string? Error)> ChangePasswordAsync(int userId, string newPassword);
+    Task<(bool Success, string? Error)> ChangePasswordAsync(string currentPassword, string newPassword);
 }

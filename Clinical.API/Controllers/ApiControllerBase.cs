@@ -1,5 +1,6 @@
 using Clinical.UseCases.Commons.Bases;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Clinical.API.Controllers
 {
@@ -11,6 +12,14 @@ namespace Clinical.API.Controllers
     [ApiController]
     public abstract class ApiControllerBase : ControllerBase
     {
+        /// <summary>Authenticated user id (JWT sub), or 0 if unauthenticated.</summary>
+        protected int CurrentUserId =>
+            int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub"), out var id) ? id : 0;
+
+        /// <summary>Authenticated username (JWT unique_name), or empty if unauthenticated.</summary>
+        protected string CurrentUsername =>
+            User.FindFirstValue(ClaimTypes.Name) ?? User.FindFirstValue("unique_name") ?? string.Empty;
+
         /// <summary>Query result → 200 OK with the payload (or 404, thrown upstream when not found).</summary>
         protected IActionResult DataResult<T>(BaseResponse<T> response) => Ok(response.Data);
 

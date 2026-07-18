@@ -33,9 +33,10 @@ public class AuthService : BaseApiService, IAuthService
         return (ok, error);
     }
 
-    public async Task<(bool Success, string? Error)> ChangePasswordAsync(int userId, string newPassword)
+    public async Task<(bool Success, string? Error)> ChangePasswordAsync(string currentPassword, string newPassword)
     {
-        var (ok, error) = await PostAsync("/api/auth/change-password", new { UserId = userId, NewPassword = newPassword });
+        var (ok, error) = await PostAsync("/api/auth/change-password",
+            new { CurrentPassword = currentPassword, NewPassword = newPassword });
         return (ok, error);
     }
 }
