@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace Clinical.API.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
     [Authorize]
     public class DoctorController : ApiControllerBase
     {
@@ -24,44 +23,38 @@ namespace Clinical.API.Controllers
 
         [HttpGet]
         public async Task<IActionResult> ListDoctors()
-        {
-            var response = await _mediator.Send(new GetAllDoctorQuery());
-            return DataResult(response);
-        }
+            => Ok(await _mediator.Send(new GetAllDoctorQuery()));
 
         [HttpGet("{doctorId:int}")]
         public async Task<IActionResult> GetDoctorById(int doctorId)
-        {
-            var response = await _mediator.Send(new GetDoctorByIdQuery() { DoctorId = doctorId });
-            return DataResult(response);
-        }
+            => Ok(await _mediator.Send(new GetDoctorByIdQuery { DoctorId = doctorId }));
 
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterDoctor([FromBody] CreateDoctorCommand command)
         {
-            var response = await _mediator.Send(command);
-            return CommandResult(response, StatusCodes.Status201Created);
+            await _mediator.Send(command);
+            return StatusCode(StatusCodes.Status201Created);
         }
 
         [HttpPut("Edit")]
         public async Task<IActionResult> EditDoctor([FromBody] UpdateDoctorCommand command)
         {
-            var response = await _mediator.Send(command);
-            return CommandResult(response, StatusCodes.Status204NoContent);
+            await _mediator.Send(command);
+            return NoContent();
         }
 
         [HttpDelete("Remove/{doctorId:int}")]
         public async Task<IActionResult> RemoveDoctor(int doctorId)
         {
-            var response = await _mediator.Send(new DeleteDoctorCommand() { DoctorId = doctorId });
-            return CommandResult(response, StatusCodes.Status204NoContent);
+            await _mediator.Send(new DeleteDoctorCommand { DoctorId = doctorId });
+            return NoContent();
         }
 
         [HttpPatch("ChangeState")]
         public async Task<IActionResult> ChangeState([FromBody] ChangeStateDoctorCommand command)
         {
-            var response = await _mediator.Send(command);
-            return CommandResult(response, StatusCodes.Status204NoContent);
+            await _mediator.Send(command);
+            return NoContent();
         }
     }
 }
