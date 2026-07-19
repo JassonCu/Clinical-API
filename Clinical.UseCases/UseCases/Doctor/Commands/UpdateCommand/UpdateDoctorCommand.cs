@@ -1,9 +1,8 @@
-using Clinical.UseCases.Commons.Bases;
 using MediatR;
 
 namespace Clinical.UseCases.UseCases.Doctor.Commands.UpdateCommand;
 
-public class UpdateDoctorCommand : IRequest<BaseResponse<bool>>
+public class UpdateDoctorCommand : IRequest
 {
     public int DoctorId { get; set; }
     public string? DocumentNumber { get; set; }

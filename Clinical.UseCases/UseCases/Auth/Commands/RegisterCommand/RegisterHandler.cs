@@ -1,5 +1,6 @@
 using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
+using Clinical.UseCases.Commons.Exceptions;
 using Clinical.Utils.Constants;
 using MediatR;
 using Entity = Clinical.Domain.Entities;
@@ -21,11 +22,7 @@ public class RegisterHandler : IRequestHandler<RegisterCommand, BaseResponse<boo
 
         var existing = await _authRepository.GetUserByUsernameAsync(request.Username!);
         if (existing is not null)
-        {
-            response.IsSuccess = false;
-            response.Message = GlobalMessage.MESSAGE_EXISTS;
-            return response;
-        }
+            throw new ConflictException(GlobalMessage.MESSAGE_EXISTS);
 
         var user = new Entity.User
         {

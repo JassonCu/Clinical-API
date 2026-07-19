@@ -2,6 +2,7 @@
 using Clinical.UseCases.Commons.Bases;
 using Clinical.Utils.Constants;
 using MediatR;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.Analysis.Commands.DeleteCommand;
 
@@ -20,11 +21,11 @@ public class DeleteAnalysisHandler : IRequestHandler<DeleteAnalysisCommand, Base
 
         response.Data = await _unitOfWork.Analysis.ExecAsync(StoreProcedures.uspAnalysisRemove, request);
 
-        if (response.Data)
-        {
-            response.IsSuccess = true;
-            response.Message = GlobalMessage.MESSAGE_DELETE;
-        }
+        if (!response.Data)
+            throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
+
+        response.IsSuccess = true;
+        response.Message = GlobalMessage.MESSAGE_DELETE;
 
         return response;
     }

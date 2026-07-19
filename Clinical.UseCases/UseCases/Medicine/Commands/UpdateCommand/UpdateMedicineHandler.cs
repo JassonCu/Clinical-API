@@ -5,6 +5,7 @@ using Clinical.Utils.Constants;
 using Clinical.Utils.HelperExtensions;
 using MediatR;
 using Entity = Clinical.Domain.Entities;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.Medicine.Commands.UpdateCommand;
 
@@ -26,7 +27,11 @@ public class UpdateMedicineHandler : IRequestHandler<UpdateMedicineCommand, Base
         var entity = _mapper.Map<Entity.Medicine>(request);
         var parameters = entity.GetPropertiesWithValues();
         response.Data = await _unitOfWork.Medicine.ExecAsync(StoreProcedures.uspMedicineEdit, parameters);
-        if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_UPDATE; }
+        if (!response.Data)
+            throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
+
+        response.IsSuccess = true;
+        response.Message = GlobalMessage.MESSAGE_UPDATE;
 
         return response;
     }

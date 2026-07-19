@@ -5,6 +5,7 @@ using Clinical.Utils.Constants;
 using Clinical.Utils.HelperExtensions;
 using MediatR;
 using Entity = Clinical.Domain.Entities;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.Appointment.Commands.ChangeStateCommand;
 
@@ -27,11 +28,11 @@ public class ChangeStateAppointmentHandler : IRequestHandler<ChangeStateAppointm
         var parameters = appointment.GetPropertiesWithValues();
         response.Data = await _unitOfWork.Appointment.ExecAsync(StoreProcedures.uspAppointmentChangeState, parameters);
 
-        if (response.Data)
-        {
-            response.IsSuccess = true;
-            response.Message = GlobalMessage.MESSAGE_UPDATE_STATE;
-        }
+        if (!response.Data)
+            throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
+
+        response.IsSuccess = true;
+        response.Message = GlobalMessage.MESSAGE_UPDATE_STATE;
 
         return response;
     }

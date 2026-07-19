@@ -5,6 +5,7 @@ using Clinical.Utils.Constants;
 using Clinical.Utils.HelperExtensions;
 using MediatR;
 using Entity = Clinical.Domain.Entities;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.PatientAllergy.Commands.ChangeStateCommand;
 
@@ -26,7 +27,12 @@ public class ChangeStateAllergyHandler : IRequestHandler<ChangeStateAllergyComma
         var entity = _mapper.Map<Entity.PatientAllergy>(request);
         var parameters = entity.GetPropertiesWithValues();
         response.Data = await _unitOfWork.PatientAllergy.ExecAsync(StoreProcedures.uspAllergyChangeState, parameters);
-        if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_UPDATE; }
+        
+        if (!response.Data)
+            throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
+
+        response.IsSuccess = true;
+        response.Message = GlobalMessage.MESSAGE_UPDATE;
 
         return response;
     }

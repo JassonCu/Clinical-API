@@ -5,6 +5,7 @@ using Clinical.Utils.Constants;
 using Clinical.Utils.HelperExtensions;
 using MediatR;
 using Entity = Clinical.Domain.Entities;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.Appointment.Commands.UpdateCommand;
 
@@ -27,11 +28,11 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
         var parameters = appointment.GetPropertiesWithValues();
         response.Data = await _unitOfWork.Appointment.ExecAsync(StoreProcedures.uspAppointmentEdit, parameters);
 
-        if (response.Data)
-        {
-            response.IsSuccess = true;
-            response.Message = GlobalMessage.MESSAGE_UPDATE;
-        }
+        if (!response.Data)
+            throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
+
+        response.IsSuccess = true;
+        response.Message = GlobalMessage.MESSAGE_UPDATE;
 
         return response;
     }

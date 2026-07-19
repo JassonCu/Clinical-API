@@ -5,6 +5,7 @@ using Clinical.UseCases.Commons.Bases;
 using MediatR;
 using Clinical.Utils.Constants;
 using Clinical.Utils.HelperExtensions;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.Analysis.Commands.ChangeStateCommand;
 
@@ -27,11 +28,11 @@ public class ChangeStateAnalysisHandler : IRequestHandler<ChangeStateAnalysisCom
         var parameters = analysis.GetPropertiesWithValues();
         response.Data = await _unitOfWork.Analysis.ExecAsync(StoreProcedures.uspAnalysisChangeState, parameters);
 
-        if (response.Data)
-        {
-            response.IsSuccess = true;
-            response.Message = GlobalMessage.MESSAGE_UPDATE;
-        }
+        if (!response.Data)
+            throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
+
+        response.IsSuccess = true;
+        response.Message = GlobalMessage.MESSAGE_UPDATE;
 
         return response;
     }

@@ -2,6 +2,7 @@ using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
 using Clinical.Utils.Constants;
 using MediatR;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.ExamResult.Commands.DeleteCommand;
 
@@ -20,11 +21,11 @@ public class DeleteExamResultHandler : IRequestHandler<DeleteExamResultCommand, 
 
         response.Data = await _unitOfWork.ExamResult.ExecAsync(StoreProcedures.uspExamResultRemove, request);
 
-        if (response.Data)
-        {
-            response.IsSuccess = true;
-            response.Message = GlobalMessage.MESSAGE_DELETE;
-        }
+        if (!response.Data)
+            throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
+
+        response.IsSuccess = true;
+        response.Message = GlobalMessage.MESSAGE_DELETE;
 
         return response;
     }

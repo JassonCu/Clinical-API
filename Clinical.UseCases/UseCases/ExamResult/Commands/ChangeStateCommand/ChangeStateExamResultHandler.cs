@@ -5,6 +5,7 @@ using Clinical.Utils.Constants;
 using Clinical.Utils.HelperExtensions;
 using MediatR;
 using Entity = Clinical.Domain.Entities;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.ExamResult.Commands.ChangeStateCommand;
 
@@ -27,11 +28,11 @@ public class ChangeStateExamResultHandler : IRequestHandler<ChangeStateExamResul
         var parameters = examResult.GetPropertiesWithValues();
         response.Data = await _unitOfWork.ExamResult.ExecAsync(StoreProcedures.uspExamResultChangeState, parameters);
 
-        if (response.Data)
-        {
-            response.IsSuccess = true;
-            response.Message = GlobalMessage.MESSAGE_UPDATE_STATE;
-        }
+        if (!response.Data)
+            throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
+
+        response.IsSuccess = true;
+        response.Message = GlobalMessage.MESSAGE_UPDATE_STATE;
 
         return response;
     }

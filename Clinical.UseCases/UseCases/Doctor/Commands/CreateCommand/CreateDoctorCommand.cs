@@ -1,9 +1,8 @@
-using Clinical.UseCases.Commons.Bases;
 using MediatR;
 
 namespace Clinical.UseCases.UseCases.Doctor.Commands.CreateCommand;
 
-public class CreateDoctorCommand : IRequest<BaseResponse<bool>>
+public class CreateDoctorCommand : IRequest
 {
     public string? DocumentNumber { get; set; }
     public string? FirstName { get; set; }

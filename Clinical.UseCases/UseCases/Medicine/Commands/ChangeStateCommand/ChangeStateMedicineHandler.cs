@@ -5,6 +5,7 @@ using Clinical.Utils.Constants;
 using Clinical.Utils.HelperExtensions;
 using MediatR;
 using Entity = Clinical.Domain.Entities;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.Medicine.Commands.ChangeStateCommand;
 
@@ -26,7 +27,11 @@ public class ChangeStateMedicineHandler : IRequestHandler<ChangeStateMedicineCom
         var entity = _mapper.Map<Entity.Medicine>(request);
         var parameters = entity.GetPropertiesWithValues();
         response.Data = await _unitOfWork.Medicine.ExecAsync(StoreProcedures.uspMedicineChangeState, parameters);
-        if (response.Data) { response.IsSuccess = true; response.Message = GlobalMessage.MESSAGE_UPDATE_STATE; }
+        if (!response.Data)
+            throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
+
+        response.IsSuccess = true;
+        response.Message = GlobalMessage.MESSAGE_UPDATE_STATE;
 
         return response;
     }

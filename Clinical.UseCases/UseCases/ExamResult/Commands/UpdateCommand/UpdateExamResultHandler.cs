@@ -5,6 +5,7 @@ using Clinical.Utils.Constants;
 using Clinical.Utils.HelperExtensions;
 using MediatR;
 using Entity = Clinical.Domain.Entities;
+using Clinical.UseCases.Commons.Exceptions;
 
 namespace Clinical.UseCases.UseCases.ExamResult.Commands.UpdateCommand;
 
@@ -27,11 +28,11 @@ public class UpdateExamResultHandler : IRequestHandler<UpdateExamResultCommand, 
         var parameters = examResult.GetPropertiesWithValues();
         response.Data = await _unitOfWork.ExamResult.ExecAsync(StoreProcedures.uspExamResultEdit, parameters);
 
-        if (response.Data)
-        {
-            response.IsSuccess = true;
-            response.Message = GlobalMessage.MESSAGE_UPDATE;
-        }
+        if (!response.Data)
+            throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
+
+        response.IsSuccess = true;
+        response.Message = GlobalMessage.MESSAGE_UPDATE;
 
         return response;
     }
