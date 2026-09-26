@@ -1,0 +1,39 @@
+version: 2
+updates:
+  # NuGet dependencies across all projects in the solution.
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+    # Group related/low-risk updates into single PRs to cut noise.
+    groups:
+      serilog:
+        patterns:
+          - "Serilog*"
+      microsoft:
+        patterns:
+          - "Microsoft.*"
+          - "System.*"
+      test-tooling:
+        patterns:
+          - "xunit*"
+          - "Moq"
+          - "coverlet*"
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Keep the GitHub Actions used by the CI workflow up to date.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "github-actions"
