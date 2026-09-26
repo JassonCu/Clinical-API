@@ -3,6 +3,7 @@ using Clinical.Infraestructure.Services;
 using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
 using Clinical.Utils.Constants;
+using Clinical.Utils.Security;
 using MediatR;
 
 namespace Clinical.UseCases.UseCases.Auth.Commands.RefreshTokenCommand;
@@ -22,7 +23,8 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, BaseResp
     {
         var response = new BaseResponse<AuthResponseDto>();
 
-        var user = await _authRepository.GetUserByRefreshTokenAsync(request.RefreshToken!);
+        // The client sends the raw token; look it up by its hash (what we stored).
+        var user = await _authRepository.GetUserByRefreshTokenAsync(TokenHasher.Hash(request.RefreshToken!));
 
         if (user is null || user.RefreshTokenExpiry < DateTime.UtcNow)
         {
@@ -36,7 +38,8 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, BaseResp
         var newRefreshToken = _jwtTokenService.GenerateRefreshToken();
         var refreshExpiry = DateTime.UtcNow.AddDays(7);
 
-        await _authRepository.UpdateRefreshTokenAsync(user.UserId.Value, newRefreshToken, refreshExpiry);
+        // Rotate: store the new hash, return the new raw token to the client.
+        await _authRepository.UpdateRefreshTokenAsync(user.UserId.Value, TokenHasher.Hash(newRefreshToken), refreshExpiry);
 
         response.IsSuccess = true;
         response.Message = GlobalMessage.MESSAGE_REFRESH_TOKEN_SUCCESS;

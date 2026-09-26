@@ -3,6 +3,7 @@ using Clinical.Infraestructure.Services;
 using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
 using Clinical.Utils.Constants;
+using Clinical.Utils.Security;
 using MediatR;
 
 namespace Clinical.UseCases.UseCases.Auth.Commands.LoginCommand;
@@ -43,7 +44,8 @@ public class LoginHandler : IRequestHandler<LoginCommand, BaseResponse<AuthRespo
         var refreshToken = _jwtTokenService.GenerateRefreshToken();
         var refreshExpiry = DateTime.UtcNow.AddDays(7);
 
-        await _authRepository.UpdateRefreshTokenAsync(user.UserId.Value, refreshToken, refreshExpiry);
+        // Persist only the hash; the client keeps the raw token returned below.
+        await _authRepository.UpdateRefreshTokenAsync(user.UserId.Value, TokenHasher.Hash(refreshToken), refreshExpiry);
 
         response.IsSuccess = true;
         response.Message = GlobalMessage.MESSAGE_TOKEN;
