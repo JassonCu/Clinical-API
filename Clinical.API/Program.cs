@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Compact;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
 
@@ -20,11 +23,39 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.Host.UseSerilog((ctx, lc) => lc
-        .ReadFrom.Configuration(ctx.Configuration)
-        .WriteTo.Console()
-        .WriteTo.File("logs/clinical-.log", rollingInterval: RollingInterval.Day,
-            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"));
+    builder.Host.UseSerilog((context, services, loggerConfiguration) =>
+    {
+        loggerConfiguration
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .Enrich.WithMachineName()
+            .Enrich.WithEnvironmentName()
+            .Enrich.WithProcessId()
+            .Enrich.WithThreadId()
+            .Enrich.WithProperty("Application", "Clinical.API");
+
+        // Console: human-readable in development, structured JSON in production (for log collectors).
+        if (context.HostingEnvironment.IsDevelopment())
+            loggerConfiguration.WriteTo.Console(
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext} {Message:lj} {Properties:j}{NewLine}{Exception}");
+        else
+            loggerConfiguration.WriteTo.Console(new CompactJsonFormatter());
+
+        // Rolling file, bounded so it can never fill the disk.
+        loggerConfiguration.WriteTo.File(
+            new CompactJsonFormatter(),
+            "logs/clinical-.log",
+            rollingInterval: RollingInterval.Day,
+            rollOnFileSizeLimit: true,
+            fileSizeLimitBytes: 50 * 1024 * 1024,
+            retainedFileCountLimit: 30);
+
+        // Centralized logging (opt-in): active only when a Seq server is configured.
+        var seqUrl = context.Configuration["Serilog:SeqUrl"];
+        if (!string.IsNullOrWhiteSpace(seqUrl))
+            loggerConfiguration.WriteTo.Seq(seqUrl, apiKey: context.Configuration["Serilog:SeqApiKey"]);
+    });
 
     var jwtSettings = builder.Configuration.GetSection("JwtSettings");
     var secretKey = jwtSettings["SecretKey"];
@@ -150,7 +181,31 @@ try
     }
 
     app.UseHttpsRedirection();
-    app.UseSerilogRequestLogging();
+    app.UseSerilogRequestLogging(options =>
+    {
+        options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
+        options.GetLevel = (httpContext, elapsed, ex) =>
+            ex is not null || httpContext.Response.StatusCode >= 500 ? LogEventLevel.Error
+            : httpContext.Response.StatusCode >= 400 ? LogEventLevel.Warning
+            : httpContext.Request.Path.StartsWithSegments("/health") ? LogEventLevel.Verbose
+            : LogEventLevel.Information;
+        options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+        {
+            diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+            diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+            diagnosticContext.Set("ClientIp", httpContext.Connection.RemoteIpAddress?.ToString());
+            diagnosticContext.Set("UserAgent", httpContext.Request.Headers.UserAgent.ToString());
+            // Attributes the request to a user for traceability. Bodies/headers are never logged (no PHI/credentials).
+            if (httpContext.User.Identity?.IsAuthenticated == true)
+            {
+                diagnosticContext.Set("UserName", httpContext.User.Identity.Name);
+                var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                             ?? httpContext.User.FindFirst("sub")?.Value;
+                if (userId is not null)
+                    diagnosticContext.Set("UserId", userId);
+            }
+        };
+    });
     app.UseCors("ClinicalPolicy");
     app.UseAuthentication();
     app.UseAuthorization();

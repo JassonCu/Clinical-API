@@ -32,6 +32,22 @@ Opcionales (tienen default en `appsettings.json`): `JwtSettings__Issuer`, `JwtSe
 | `ASPNETCORE_ENVIRONMENT` | `Production` | |
 | `ApiSettings__BaseUrl` | `https://api.tudominio.com` | URL pública de la API |
 
+## Logging
+
+- **Consola**: JSON compacto (CompactJson) en Producción — pensado para que lo recolecte el orquestador/contenedor. En Development es legible para humanos.
+- **Archivo**: `logs/clinical-*.log` (API) y `logs/clinical-web-*.log` (Web), JSON, rotación diaria, **máx. 50 MB por archivo y 30 archivos retenidos** (no llena disco). En contenedores es efímero; la fuente de verdad debe ser la consola/Seq.
+- **Enriquecido** con `MachineName`, `EnvironmentName`, `ProcessId`, `ThreadId`, `Application`, `TraceId`, y por request: `RequestHost`, `ClientIp`, `UserAgent`, `StatusCode`, `UserId`/`UserName` (si está autenticado). **No se registran cuerpos ni cabeceras** (nada de contraseñas/PHI).
+- **Niveles por request**: 5xx/excepción → Error, 4xx → Warning, `/health` y estáticos → Verbose, resto → Information.
+
+**Logging centralizado (opcional, Seq)** — se activa solo si configurás la URL:
+
+| Variable | Ejemplo |
+|----------|---------|
+| `Serilog__SeqUrl` | `https://seq.tudominio.com` |
+| `Serilog__SeqApiKey` | *(si tu Seq lo requiere)* |
+
+Sin `Serilog__SeqUrl`, el sink de Seq queda desactivado. Para otro backend (Elastic, App Insights, Loki, etc.) alcanza con agregar el sink correspondiente en `Program.cs`.
+
 ## Generar una `SecretKey` fuerte
 
 ```bash
