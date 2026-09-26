@@ -25,7 +25,25 @@ try
             outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"));
 
     var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-    var secretKey = jwtSettings["SecretKey"]!;
+    var secretKey = jwtSettings["SecretKey"];
+
+    // Fail fast: never start without a valid signing key or connection string.
+    // In production these must come from environment variables / a secret store, never from committed files.
+    if (string.IsNullOrWhiteSpace(secretKey) || secretKey.Length < 32)
+        throw new InvalidOperationException(
+            "JwtSettings:SecretKey no está configurada o es demasiado corta (mínimo 32 caracteres). " +
+            "Configúrela mediante la variable de entorno JwtSettings__SecretKey.");
+
+    if (!builder.Environment.IsDevelopment() &&
+        (secretKey.Contains("ChangeInProduction") || secretKey.StartsWith("DEV-ONLY")))
+        throw new InvalidOperationException(
+            "La SecretKey de ejemplo no puede usarse fuera de desarrollo. " +
+            "Rote la clave y configúrela mediante la variable de entorno JwtSettings__SecretKey.");
+
+    if (string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("ClinicalConnection")))
+        throw new InvalidOperationException(
+            "ConnectionStrings:ClinicalConnection no está configurada. " +
+            "Configúrela mediante la variable de entorno ConnectionStrings__ClinicalConnection.");
 
     builder.Services.AddAuthentication(options =>
     {
