@@ -13,6 +13,11 @@ public class LoginHandler : IRequestHandler<LoginCommand, BaseResponse<AuthRespo
     private readonly IAuthRepository _authRepository;
     private readonly IJwtTokenService _jwtTokenService;
 
+    // Precomputed hash so BCrypt.Verify runs even when the username does not exist,
+    // keeping response time comparable and preventing username enumeration by timing.
+    private static readonly string DummyPasswordHash =
+        BCrypt.Net.BCrypt.HashPassword("timing-attack-mitigation", workFactor: 12);
+
     public LoginHandler(IAuthRepository authRepository, IJwtTokenService jwtTokenService)
     {
         _authRepository = authRepository;
@@ -25,7 +30,12 @@ public class LoginHandler : IRequestHandler<LoginCommand, BaseResponse<AuthRespo
 
         var user = await _authRepository.GetUserByUsernameAsync(request.Username!);
 
-        if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        // Always run one verification (against a dummy hash when the user is missing) so a
+        // non-existent username and a wrong password cost the same time and return the same message.
+        var hashToVerify = string.IsNullOrEmpty(user?.PasswordHash) ? DummyPasswordHash : user.PasswordHash;
+        var passwordValid = BCrypt.Net.BCrypt.Verify(request.Password, hashToVerify);
+
+        if (user is null || !passwordValid)
         {
             response.IsSuccess = false;
             response.Message = GlobalMessage.MESSAGE_TOKEN_ERROR;

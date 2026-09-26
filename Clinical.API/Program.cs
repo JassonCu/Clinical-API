@@ -131,7 +131,11 @@ try
         context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
         context.Response.Headers.Append("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
         if (!app.Environment.IsDevelopment())
+        {
             context.Response.Headers.Append("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+            // The API only serves JSON; lock down resource loading and framing.
+            context.Response.Headers.Append("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'");
+        }
         await next();
     });
 
