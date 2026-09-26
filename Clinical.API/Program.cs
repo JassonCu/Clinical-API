@@ -1,8 +1,10 @@
 using Clinical.API.Extensions.Middleware;
+using Clinical.API.HealthChecks;
 using Clinical.Infraestructure.Extensions;
 using Clinical.Persistence.Extensions;
 using Clinical.UseCases.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -103,10 +105,22 @@ try
     builder.Services.AddInyectionPersistence();
     builder.Services.AddInyectionApplication();
 
-    builder.Services.AddHealthChecks();
+    // Trust the reverse proxy / load balancer so the real client IP (X-Forwarded-For)
+    // reaches the rate limiter, and the scheme (X-Forwarded-Proto) is honored.
+    // In fixed infrastructure, restrict KnownProxies/KnownNetworks to your proxy for stronger safety.
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+        options.KnownNetworks.Clear();
+        options.KnownProxies.Clear();
+    });
+
+    builder.Services.AddHealthChecks()
+        .AddCheck<DatabaseHealthCheck>("database");
 
     var app = builder.Build();
 
+    app.UseForwardedHeaders();
     app.UseRateLimiter();
 
     app.Use(async (context, next) =>
