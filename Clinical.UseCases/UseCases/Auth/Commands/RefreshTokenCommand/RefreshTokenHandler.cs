@@ -45,13 +45,15 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, BaseResp
         response.Message = GlobalMessage.MESSAGE_REFRESH_TOKEN_SUCCESS;
         response.Data = new AuthResponseDto
         {
+            UserId = user.UserId!.Value,
             AccessToken = newAccessToken,
             RefreshToken = newRefreshToken,
             ExpiresAt = DateTime.UtcNow.AddMinutes(15),
             Username = user.Username,
             Email = user.Email,
             FullName = $"{user.FirstName} {user.LastName}",
-            Role = roleName
+            Role = roleName,
+            MustChangePassword = user.MustChangePassword ?? false
         };
 
         return response;

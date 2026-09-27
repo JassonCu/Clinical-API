@@ -1,6 +1,7 @@
 using Clinical.Application.DTOS.User.Request;
 using Clinical.Interface.Interfaces;
 using Clinical.UseCases.Commons.Bases;
+using Clinical.UseCases.Commons.Exceptions;
 using Clinical.Utils.Constants;
 using MediatR;
 
@@ -28,7 +29,8 @@ namespace Clinical.UseCases.UseCases.User.Commands.UpdateCommand
                 RoleId = request.RoleId
             };
 
-            await _userRepository.UpdateUserAsync(dto);
+            if (await _userRepository.UpdateUserAsync(dto) == 0)
+                throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
 
             response.IsSuccess = true;
             response.Data = true;

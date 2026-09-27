@@ -76,13 +76,15 @@ public class LoginHandler : IRequestHandler<LoginCommand, BaseResponse<AuthRespo
         response.Message = GlobalMessage.MESSAGE_TOKEN;
         response.Data = new AuthResponseDto
         {
+            UserId = user.UserId!.Value,
             AccessToken = accessToken,
             RefreshToken = refreshToken,
             ExpiresAt = DateTime.UtcNow.AddMinutes(15),
             Username = user.Username,
             Email = user.Email,
             FullName = $"{user.FirstName} {user.LastName}",
-            Role = roleName
+            Role = roleName,
+            MustChangePassword = user.MustChangePassword ?? false
         };
 
         return response;

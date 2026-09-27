@@ -100,5 +100,35 @@ namespace Clinical.Test.AuthTests
             attempts.Verify(a => a.Reset("alice"), Times.Once);
             attempts.Verify(a => a.RegisterFailure(It.IsAny<string>()), Times.Never);
         }
+
+        [Fact]
+        public async Task Login_Success_PopulatesUserIdAndMustChangePassword()
+        {
+            var authRepo = new Mock<IAuthRepository>();
+            authRepo.Setup(a => a.GetUserByUsernameAsync("temp")).ReturnsAsync(new User
+            {
+                UserId = 42,
+                Username = "temp",
+                Email = "t@clinic.test",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Temp123!"),
+                RoleId = 1,
+                State = 1,
+                MustChangePassword = true
+            });
+            authRepo.Setup(a => a.GetRoleNameAsync(1)).ReturnsAsync("User");
+            var jwt = new Mock<IJwtTokenService>();
+            jwt.Setup(j => j.GenerateAccessToken(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+               .Returns("access");
+            jwt.Setup(j => j.GenerateRefreshToken()).Returns("refresh");
+
+            var handler = Build(authRepo, jwt);
+            var result = await handler.Handle(
+                new LoginCommand { Username = "temp", Password = "Temp123!" }, CancellationToken.None);
+
+            // These flow to Clinical.Web, which forces the password change when MustChangePassword is true.
+            Assert.True(result.IsSuccess);
+            Assert.Equal(42, result.Data!.UserId);
+            Assert.True(result.Data.MustChangePassword);
+        }
     }
 }

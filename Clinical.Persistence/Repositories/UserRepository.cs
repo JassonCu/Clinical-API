@@ -34,19 +34,19 @@ namespace Clinical.Persistence.Repositories
                 commandType: CommandType.StoredProcedure);
         }
 
-        public async Task UpdateUserAsync(UpdateUserDto dto)
+        public async Task<int> UpdateUserAsync(UpdateUserDto dto)
         {
             using var connection = _context.CreateConnection;
-            await connection.ExecuteAsync(
+            return await connection.ExecuteAsync(
                 StoreProcedures.uspUserEdit,
                 new { dto.UserId, dto.FirstName, dto.LastName, dto.Email, dto.RoleId },
                 commandType: CommandType.StoredProcedure);
         }
 
-        public async Task ChangeUserStateAsync(int userId, int state)
+        public async Task<int> ChangeUserStateAsync(int userId, int state)
         {
             using var connection = _context.CreateConnection;
-            await connection.ExecuteAsync(
+            return await connection.ExecuteAsync(
                 StoreProcedures.uspUserChangeState,
                 new { UserId = userId, State = state },
                 commandType: CommandType.StoredProcedure);

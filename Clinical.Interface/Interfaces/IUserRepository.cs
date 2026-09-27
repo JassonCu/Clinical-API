@@ -7,8 +7,8 @@ namespace Clinical.Interface.Interfaces
     {
         Task<IEnumerable<UserListDto>> GetAllUsersAsync();
         Task<UserDetailDto?> GetUserByIdAsync(int userId);
-        Task UpdateUserAsync(UpdateUserDto dto);
-        Task ChangeUserStateAsync(int userId, int state);
+        Task<int> UpdateUserAsync(UpdateUserDto dto);
+        Task<int> ChangeUserStateAsync(int userId, int state);
         Task<IEnumerable<RoleDto>> GetAllRolesAsync();
     }
 }
