@@ -12,21 +12,32 @@ public class LoginHandler : IRequestHandler<LoginCommand, BaseResponse<AuthRespo
 {
     private readonly IAuthRepository _authRepository;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly ILoginAttemptTracker _attempts;
 
     // Precomputed hash so BCrypt.Verify runs even when the username does not exist,
     // keeping response time comparable and preventing username enumeration by timing.
     private static readonly string DummyPasswordHash =
         BCrypt.Net.BCrypt.HashPassword("timing-attack-mitigation", workFactor: 12);
 
-    public LoginHandler(IAuthRepository authRepository, IJwtTokenService jwtTokenService)
+    public LoginHandler(IAuthRepository authRepository, IJwtTokenService jwtTokenService, ILoginAttemptTracker attempts)
     {
         _authRepository = authRepository;
         _jwtTokenService = jwtTokenService;
+        _attempts = attempts;
     }
 
     public async Task<BaseResponse<AuthResponseDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var response = new BaseResponse<AuthResponseDto>();
+
+        // Temporary lockout after repeated failures (complements the per-IP rate limiter).
+        // Keyed on the submitted username so it never reveals whether the account exists.
+        if (_attempts.IsLockedOut(request.Username!))
+        {
+            response.IsSuccess = false;
+            response.Message = GlobalMessage.MESSAGE_ACCOUNT_LOCKED;
+            return response;
+        }
 
         var user = await _authRepository.GetUserByUsernameAsync(request.Username!);
 
@@ -37,10 +48,14 @@ public class LoginHandler : IRequestHandler<LoginCommand, BaseResponse<AuthRespo
 
         if (user is null || !passwordValid)
         {
+            _attempts.RegisterFailure(request.Username!);
             response.IsSuccess = false;
             response.Message = GlobalMessage.MESSAGE_TOKEN_ERROR;
             return response;
         }
+
+        // Correct credentials → clear any accumulated failures.
+        _attempts.Reset(request.Username!);
 
         if (user.State != 1)
         {

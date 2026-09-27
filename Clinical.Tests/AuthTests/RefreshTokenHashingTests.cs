@@ -31,7 +31,7 @@ namespace Clinical.Test.AuthTests
                .Returns("access-token");
             jwt.Setup(j => j.GenerateRefreshToken()).Returns(rawRefresh);
 
-            var handler = new LoginHandler(authRepo.Object, jwt.Object);
+            var handler = new LoginHandler(authRepo.Object, jwt.Object, new Mock<ILoginAttemptTracker>().Object);
             var result = await handler.Handle(new LoginCommand { Username = "alice", Password = "Secret123!" }, CancellationToken.None);
 
             Assert.True(result.IsSuccess);

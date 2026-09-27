@@ -17,6 +17,7 @@ public class GlobalMessage
     public const string MESSAGE_EXCEPTION = "Hubo un error inesperado. Comuníquese con el administrador.";
     public const string MESSAGE_USER_INACTIVE = "El usuario se encuentra inactivo.";
     public const string MESSAGE_USER_LOCKED = "El usuario se encuentra bloqueado.";
+    public const string MESSAGE_ACCOUNT_LOCKED = "Cuenta bloqueada temporalmente por múltiples intentos fallidos. Intente nuevamente más tarde.";
     public const string MESSAGE_USER_NOT_FOUND = "Usuario no encontrado.";
     public const string MESSAGE_REFRESH_TOKEN_INVALID = "Refresh token inválido o expirado.";
     public const string MESSAGE_REFRESH_TOKEN_SUCCESS = "Nuevo access token generado correctamente.";

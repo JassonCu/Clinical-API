@@ -48,6 +48,18 @@ Opcionales (tienen default en `appsettings.json`): `JwtSettings__Issuer`, `JwtSe
 
 Sin `Serilog__SeqUrl`, el sink de Seq queda desactivado. Para otro backend (Elastic, App Insights, Loki, etc.) alcanza con agregar el sink correspondiente en `Program.cs`.
 
+## Bloqueo de cuenta (login)
+
+Tras varios intentos fallidos, el usuario se bloquea temporalmente (complementa el rate limiting por IP). Ajustable por variables de entorno (defaults entre paréntesis):
+
+| Variable | Default |
+|----------|---------|
+| `Auth__Lockout__MaxFailedAttempts` | 5 |
+| `Auth__Lockout__WindowMinutes` | 15 |
+| `Auth__Lockout__LockoutMinutes` | 15 |
+
+> El conteo es **en memoria por instancia**. Para un despliegue multi-instancia, respaldalo con una caché distribuida (Redis). Nota: un bloqueo por usuario permite un DoS dirigido (bloquear a un usuario legítimo a propósito); por eso la ventana es corta y configurable.
+
 ## Generar una `SecretKey` fuerte
 
 ```bash
