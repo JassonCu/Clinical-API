@@ -1,6 +1,8 @@
 using Clinical.API.Extensions.Middleware;
 using Clinical.API.HealthChecks;
+using Clinical.API.Services;
 using Clinical.Infraestructure.Extensions;
+using Clinical.Interface.Interfaces;
 using Clinical.Persistence.Extensions;
 using Clinical.UseCases.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,6 +30,8 @@ try
         loggerConfiguration
             .ReadFrom.Configuration(context.Configuration)
             .ReadFrom.Services(services)
+            // Audit trail must never be filtered out by the environment's minimum level.
+            .MinimumLevel.Override("Audit", LogEventLevel.Information)
             .Enrich.FromLogContext()
             .Enrich.WithMachineName()
             .Enrich.WithEnvironmentName()
@@ -135,6 +139,11 @@ try
     builder.Services.AddInyectionInfrastructure();
     builder.Services.AddInyectionPersistence();
     builder.Services.AddInyectionApplication();
+
+    // Caller identity + clinical audit trail (who did what, from where).
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+    builder.Services.AddSingleton<IAuditLogger, SerilogAuditLogger>();
 
     // Trust the reverse proxy / load balancer so the real client IP (X-Forwarded-For)
     // reaches the rate limiter, and the scheme (X-Forwarded-Proto) is honored.

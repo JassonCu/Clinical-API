@@ -17,6 +17,7 @@ try
         loggerConfiguration
             .ReadFrom.Configuration(context.Configuration)
             .ReadFrom.Services(services)
+            .MinimumLevel.Override("Audit", LogEventLevel.Information)
             .Enrich.FromLogContext()
             .Enrich.WithMachineName()
             .Enrich.WithEnvironmentName()

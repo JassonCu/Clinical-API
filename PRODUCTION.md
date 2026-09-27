@@ -91,6 +91,36 @@ dotnet Clinical.API.dll
 No requiere configuración: `appsettings.Development.json` trae una clave de dev y la cadena de
 conexión local. Nunca uses esos valores fuera de tu máquina.
 
+## Auditoría clínica
+
+Cada operación que **modifica** datos (comandos) genera una entrada de auditoría automática vía el
+pipeline CQRS (`AuditBehaviour`): **qué acción, sobre qué registro, quién, desde qué IP, cuándo y si tuvo éxito**.
+Las lecturas (queries) no se auditan. No se registran cuerpos ni datos sensibles.
+
+Las entradas usan el `SourceContext` **`Audit`** y se emiten siempre (un override de nivel evita que el
+umbral de producción las filtre). Para conservarlas de forma separada, enrutá ese contexto a su propio
+sink en `Program.cs`, por ejemplo:
+
+```csharp
+loggerConfiguration.WriteTo.Logger(lc => lc
+    .Filter.ByIncludingOnly(e => e.Properties.ContainsKey("SourceContext")
+        && e.Properties["SourceContext"].ToString().Contains("Audit"))
+    .WriteTo.File(new CompactJsonFormatter(), "logs/audit-.log",
+        rollingInterval: RollingInterval.Day, retainedFileCountLimit: 3650));
+```
+
+> El destino por defecto es el log estructurado (consola/archivo/Seq). Si tu normativa exige un
+> registro **inmutable / a prueba de manipulación**, reemplazá `IAuditLogger` por una implementación
+> que escriba a un almacén append-only (tabla WORM, servicio de auditoría dedicado, etc.).
+
+## Cifrado en reposo
+
+- **En reposo (base de datos):** activá **TDE** con [`Database/Scripts_Encryption_TDE.sql`](Database/Scripts_Encryption_TDE.sql)
+  (lo aplica un DBA; cifra datos, log y backups sin cambios de código). **Guardá el certificado + su clave
+  privada fuera del server**: sin ellos no se restaura un backup cifrado.
+- **En tránsito:** usá `Encrypt=true` en la cadena de conexión (`ConnectionStrings__ClinicalConnection`)
+  y TLS en el borde (HTTPS).
+
 ## Pendientes antes de producción (ver revisión completa)
 
 Esto cubre solo **secretos y configuración (P0-1/P0-2)**. Antes de lanzar quedan:

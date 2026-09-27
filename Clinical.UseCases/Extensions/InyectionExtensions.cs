@@ -15,6 +15,7 @@ public static class InyectionExtensions
         services.AddValidatorsFromAssemblies(new List<Assembly> { Assembly.GetExecutingAssembly() });
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviours<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuditBehaviour<,>));
         return services;
     }
 }
