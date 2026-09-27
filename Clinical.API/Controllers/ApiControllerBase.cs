@@ -1,13 +1,23 @@
 using Clinical.UseCases.Commons.Bases;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
 
 namespace Clinical.API.Controllers
 {
     /// <summary>
-    /// Base for API controllers. Translates the internal handler result (<see cref="BaseResponse{T}"/>)
-    /// into a pure REST response: raw data + proper status code on success, ProblemDetails on failure.
-    /// The envelope never crosses the wire.
+    /// Base for API controllers. Two response conventions coexist during the incremental
+    /// "raw type" migration (see Stage 2):
+    /// <list type="bullet">
+    ///   <item><b>Legacy</b> (most controllers): handlers return <see cref="BaseResponse{T}"/>; use the
+    ///   <c>DataResult</c>/<c>CommandResult</c>/<c>PayloadResult</c> helpers, which unwrap it to raw
+    ///   data + status code (the envelope never crosses the wire).</item>
+    ///   <item><b>Target</b> (piloted by <c>DoctorController</c>): handlers return the raw type / <c>Unit</c>
+    ///   and throw typed exceptions on failure; the controller returns <c>Ok(...)</c>/201/204 directly,
+    ///   without these helpers.</item>
+    /// </list>
+    /// New features should follow the target (Doctor) pattern; the helpers below exist for the
+    /// not-yet-migrated controllers.
     /// </summary>
     [ApiController]
     public abstract class ApiControllerBase : ControllerBase
@@ -33,7 +43,13 @@ namespace Clinical.API.Controllers
         protected IActionResult CommandResult(BaseResponse<bool> response, int successStatus)
         {
             if (!response.IsSuccess || !response.Data)
+            {
+                // A command failed WITHOUT throwing a typed exception (NotFound/Conflict/BusinessRule).
+                // That path degrades to a generic 400; log it so the omission is visible, not silent.
+                HttpContext.RequestServices.GetService<ILogger<ApiControllerBase>>()?
+                    .LogWarning("Command returned an untyped failure (degraded to 400): {Message}", response.Message);
                 return Problem(detail: response.Message ?? "Operación fallida.", statusCode: StatusCodes.Status400BadRequest);
+            }
 
             return successStatus switch
             {

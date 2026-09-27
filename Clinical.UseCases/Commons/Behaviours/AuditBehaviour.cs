@@ -1,4 +1,5 @@
 using Clinical.Interface.Interfaces;
+using Clinical.UseCases.Commons;
 using MediatR;
 
 namespace Clinical.UseCases.Commons.Behaviours
@@ -53,13 +54,26 @@ namespace Clinical.UseCases.Commons.Behaviours
                 TimestampUtc = DateTime.UtcNow
             });
 
-        // Best-effort: the target record id from an int "*Id" property on the command, if any.
+        // Resolves the audited record id:
+        //  1) an explicit [AuditEntityId] property (use this when a command has several ids), else
+        //  2) the single unambiguous int/int? "*Id" property. If there are several candidates we
+        //     return null rather than guess the wrong one (a misleading id is worse than none).
         private static string? TryGetEntityId(TRequest request)
         {
-            var property = typeof(TRequest).GetProperties()
-                .FirstOrDefault(p => p.PropertyType == typeof(int) && p.Name.EndsWith("Id", StringComparison.Ordinal));
+            var properties = typeof(TRequest).GetProperties();
 
-            return property?.GetValue(request) is int id && id > 0 ? id.ToString() : null;
+            var marked = properties.FirstOrDefault(p => p.IsDefined(typeof(AuditEntityIdAttribute), inherit: true));
+            if (marked is not null)
+                return Normalize(marked.GetValue(request));
+
+            var candidates = properties
+                .Where(p => (p.PropertyType == typeof(int) || p.PropertyType == typeof(int?))
+                            && p.Name.EndsWith("Id", StringComparison.Ordinal))
+                .ToList();
+
+            return candidates.Count == 1 ? Normalize(candidates[0].GetValue(request)) : null;
         }
+
+        private static string? Normalize(object? value) => value is int id && id > 0 ? id.ToString() : null;
     }
 }

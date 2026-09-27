@@ -26,10 +26,7 @@ public class GetAnalysisByIdHandler : IRequestHandler<GetAnalysisByIdQuery, Base
         var analysis = await _unitOfWork.Analysis.GetByIdAsync(StoreProcedures.uspAnalysisById, request);
 
         if (analysis is null)
-        {
-            response.IsSuccess = false;
-            response.Message = GlobalMessage.MESSAGE_QUERY_EMPTY;
-        }
+            throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
 
         response.IsSuccess = true;
         response.Data = _mapper.Map<GetAnalysisByIdResponseDto>(analysis);
