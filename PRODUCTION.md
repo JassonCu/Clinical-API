@@ -121,8 +121,19 @@ loggerConfiguration.WriteTo.Logger(lc => lc
 - **En tránsito:** usá `Encrypt=true` en la cadena de conexión (`ConnectionStrings__ClinicalConnection`)
   y TLS en el borde (HTTPS).
 
-## Pendientes antes de producción (ver revisión completa)
+## Pendientes antes de producción
 
-Esto cubre solo **secretos y configuración (P0-1/P0-2)**. Antes de lanzar quedan:
-hashear refresh tokens, `UseForwardedHeaders` para el rate limiting, actualizar AutoMapper (vuln. HIGH),
-health check con chequeo de BD, deploy repetible del esquema/SPs, y auditoría/cifrado de datos clínicos.
+**Ya resuelto en código** (referencia): secretos fuera de git + binding por env con fail-fast, IDOR de
+change-password, hasheo de refresh tokens, mitigación de enumeración por timing + account lockout,
+ProblemDetails, headers de seguridad + CSP, `UseForwardedHeaders` (restringido por proxies configurados),
+AutoMapper actualizado, health check con chequeo de BD, auditoría clínica (`AuditBehaviour`), logging
+estructurado, y `no-store` en el reset. CI + CodeQL + Dependabot activos.
+
+**Acciones tuyas antes de lanzar (infra/operación):**
+1. **Rotar la `SecretKey`** y **purgar el historial de git** (la clave de ejemplo quedó en commits previos).
+2. Setear las variables de entorno de producción (esta guía), incluida `ForwardedHeaders__KnownProxies__0`
+   con la IP de tu proxy/balanceador.
+3. **TDE** para cifrado en reposo (`Database/Scripts_Encryption_TDE.sql`) + `Encrypt=true` en la conexión.
+4. **Auditoría inmutable** si tu normativa lo exige (implementar `IAuditLogger` contra un store append-only).
+5. **Entrega de reset por email** (implementar `IPasswordResetNotifier`) para dejar de devolver el token en el body.
+6. Deploy repetible del esquema/SPs, backups, monitoreo, y **branch protection** en GitHub (exigir que el CI pase).

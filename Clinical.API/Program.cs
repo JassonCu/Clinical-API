@@ -13,6 +13,7 @@ using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -98,6 +99,7 @@ try
             ValidIssuer = jwtSettings["Issuer"],
             ValidAudience = jwtSettings["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+            ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
             ClockSkew = TimeSpan.Zero
         };
     });
@@ -145,14 +147,23 @@ try
     builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
     builder.Services.AddSingleton<IAuditLogger, SerilogAuditLogger>();
 
-    // Trust the reverse proxy / load balancer so the real client IP (X-Forwarded-For)
-    // reaches the rate limiter, and the scheme (X-Forwarded-Proto) is honored.
-    // In fixed infrastructure, restrict KnownProxies/KnownNetworks to your proxy for stronger safety.
+    // Honor X-Forwarded-For / X-Forwarded-Proto ONLY from the reverse proxies you configure,
+    // so a client cannot spoof its IP (which would poison the audit trail and evade rate limiting).
+    // Secure by default: with none configured, the framework trusts only loopback.
+    // Set ForwardedHeaders__KnownProxies__0, __1, ... to your proxy/load-balancer IPs in production.
     builder.Services.Configure<ForwardedHeadersOptions>(options =>
     {
         options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-        options.KnownNetworks.Clear();
-        options.KnownProxies.Clear();
+
+        var knownProxies = builder.Configuration.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? [];
+        if (knownProxies.Length > 0)
+        {
+            options.KnownNetworks.Clear();
+            options.KnownProxies.Clear();
+            foreach (var proxy in knownProxies)
+                if (IPAddress.TryParse(proxy, out var ip))
+                    options.KnownProxies.Add(ip);
+        }
     });
 
     builder.Services.AddHealthChecks()

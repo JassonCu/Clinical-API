@@ -37,6 +37,7 @@ public class AuthController : ApiControllerBase
         => PayloadResult(await _mediator.Send(command), StatusCodes.Status401Unauthorized);
 
     [HttpPost("reset-password")]
+    [EnableRateLimiting("auth")]
     [AllowAnonymous]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
         => CommandResult(await _mediator.Send(command), StatusCodes.Status200OK);
