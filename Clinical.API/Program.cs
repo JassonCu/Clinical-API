@@ -215,7 +215,7 @@ try
 
     app.Run();
 }
-catch (Exception ex)
+catch (Exception ex) when (ex is not HostAbortedException)
 {
     Log.Fatal(ex, "Application failed to start.");
 }
@@ -223,3 +223,7 @@ finally
 {
     Log.CloseAndFlush();
 }
+
+// Exposes the implicit top-level Program class to the integration test project
+// (needed by WebApplicationFactory<Program>).
+public partial class Program { }
