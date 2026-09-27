@@ -11,6 +11,7 @@ namespace Clinical.Infraestructure.Extensions
             services.AddSingleton<IJwtTokenService, JwtTokenService>();
             services.AddMemoryCache();
             services.AddSingleton<ILoginAttemptTracker, LoginAttemptTracker>();
+            services.AddSingleton<IPasswordResetNotifier, NullPasswordResetNotifier>();
             return services;
         }
     }

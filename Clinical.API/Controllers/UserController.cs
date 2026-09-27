@@ -39,6 +39,7 @@ namespace Clinical.API.Controllers
             => DataResult(await _mediator.Send(new GetAllRolesQuery()));
 
         [HttpPost("{userId:int}/reset-password")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
         public async Task<IActionResult> GenerateResetToken(int userId)
             => PayloadResult(await _mediator.Send(new GenerateResetTokenCommand { UserId = userId }));
     }

@@ -60,6 +60,12 @@ Tras varios intentos fallidos, el usuario se bloquea temporalmente (complementa 
 
 > El conteo es **en memoria por instancia**. Para un despliegue multi-instancia, respaldalo con una caché distribuida (Redis). Nota: un bloqueo por usuario permite un DoS dirigido (bloquear a un usuario legítimo a propósito); por eso la ventana es corta y configurable.
 
+## Restablecimiento de contraseña
+
+Hoy el reset es **mediado por admin**: un admin genera el token (`POST /api/user/{id}/reset-password`) y lo comparte con el usuario. Por defecto, sin canal de entrega configurado, el token vuelve **en el body** (con `Cache-Control: no-store`) para que el admin lo comparta manualmente. En la BD solo se guarda el **hash**.
+
+Para **dejar de exponer el token** en producción, implementá `IPasswordResetNotifier` (p. ej. envío por email) devolviendo `true`, y registralo en `AddInyectionInfrastructure` en lugar de `NullPasswordResetNotifier`. Cuando la entrega es directa, la API ya **no incluye** el token en la respuesta.
+
 ## Generar una `SecretKey` fuerte
 
 ```bash
