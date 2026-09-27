@@ -24,12 +24,11 @@ public class GetAllPatientHandler : IRequestHandler<GetAllPatientQuery, BaseResp
 
         var patients = await _unitOfWork.Patient.GetAllAsync(StoreProcedures.uspPatientList);
 
-        if (patients is not null)
-        {
-            response.IsSuccess = true;
-            response.Data = _mapper.Map<IEnumerable<GetAllPatientResponseDto>>(patients);
-            response.Message = GlobalMessage.MESSAGE_QUERY;
-        }
+
+        response.IsSuccess = true;
+        response.Data = _mapper.Map<IEnumerable<GetAllPatientResponseDto>>(patients);
+        response.Message = GlobalMessage.MESSAGE_QUERY;
+
 
         return response;
     }

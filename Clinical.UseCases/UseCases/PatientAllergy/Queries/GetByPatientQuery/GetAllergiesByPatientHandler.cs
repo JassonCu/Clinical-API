@@ -23,7 +23,9 @@ namespace Clinical.UseCases.UseCases.PatientAllergy.Queries.GetByPatientQuery
             var response = new BaseResponse<IEnumerable<GetAllAllergyResponseDto>>();
 
             var entities = await _unitOfWork.PatientAllergy.GetAllAsync(StoreProcedures.uspAllergyByPatient, new { PatientId = request.PatientId });
-            if (entities is not null) { response.IsSuccess = true; response.Data = _mapper.Map<IEnumerable<GetAllAllergyResponseDto>>(entities); response.Message = GlobalMessage.MESSAGE_QUERY; }
+            response.IsSuccess = true;
+            response.Data = _mapper.Map<IEnumerable<GetAllAllergyResponseDto>>(entities);
+            response.Message = GlobalMessage.MESSAGE_QUERY;
 
             return response;
         }

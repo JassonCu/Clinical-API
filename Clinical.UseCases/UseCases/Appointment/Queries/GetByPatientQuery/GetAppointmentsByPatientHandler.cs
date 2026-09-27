@@ -21,12 +21,11 @@ public class GetAppointmentsByPatientHandler : IRequestHandler<GetAppointmentsBy
 
         var appointments = await _appointmentRepository.GetAppointmentsByPatient(StoreProcedures.uspAppointmentByPatient, request);
 
-        if (appointments is not null)
-        {
-            response.IsSuccess = true;
-            response.Data = appointments;
-            response.Message = GlobalMessage.MESSAGE_QUERY;
-        }
+
+        response.IsSuccess = true;
+        response.Data = appointments;
+        response.Message = GlobalMessage.MESSAGE_QUERY;
+
 
         return response;
     }

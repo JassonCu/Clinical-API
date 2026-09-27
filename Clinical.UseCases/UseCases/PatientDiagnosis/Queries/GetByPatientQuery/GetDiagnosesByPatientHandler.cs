@@ -23,7 +23,9 @@ namespace Clinical.UseCases.UseCases.PatientDiagnosis.Queries.GetByPatientQuery
             var response = new BaseResponse<IEnumerable<GetAllDiagnosisResponseDto>>();
 
             var entities = await _unitOfWork.PatientDiagnosis.GetAllAsync(StoreProcedures.uspDiagnosisByPatient, new { PatientId = request.PatientId });
-            if (entities is not null) { response.IsSuccess = true; response.Data = _mapper.Map<IEnumerable<GetAllDiagnosisResponseDto>>(entities); response.Message = GlobalMessage.MESSAGE_QUERY; }
+            response.IsSuccess = true;
+            response.Data = _mapper.Map<IEnumerable<GetAllDiagnosisResponseDto>>(entities);
+            response.Message = GlobalMessage.MESSAGE_QUERY;
 
             return response;
         }

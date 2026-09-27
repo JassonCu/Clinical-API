@@ -21,12 +21,11 @@ public class GetExamResultsByPatientHandler : IRequestHandler<GetExamResultsByPa
 
         var results = await _examResultRepository.GetExamResultsByPatient(StoreProcedures.uspExamResultByPatient, request);
 
-        if (results is not null)
-        {
-            response.IsSuccess = true;
-            response.Data = results;
-            response.Message = GlobalMessage.MESSAGE_QUERY;
-        }
+
+        response.IsSuccess = true;
+        response.Data = results;
+        response.Message = GlobalMessage.MESSAGE_QUERY;
+
 
         return response;
     }

@@ -23,7 +23,9 @@ public class GetVitalSignsByPatientHandler : IRequestHandler<GetVitalSignsByPati
         var response = new BaseResponse<IEnumerable<GetAllVitalSignResponseDto>>();
 
         var entities = await _unitOfWork.VitalSign.GetAllAsync(StoreProcedures.uspVitalSignByPatient, new { PatientId = request.PatientId });
-        if (entities is not null) { response.IsSuccess = true; response.Data = _mapper.Map<IEnumerable<GetAllVitalSignResponseDto>>(entities); response.Message = GlobalMessage.MESSAGE_QUERY; }
+        response.IsSuccess = true;
+        response.Data = _mapper.Map<IEnumerable<GetAllVitalSignResponseDto>>(entities);
+        response.Message = GlobalMessage.MESSAGE_QUERY;
 
         return response;
     }

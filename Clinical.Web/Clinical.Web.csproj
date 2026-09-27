@@ -6,12 +6,7 @@
     <RootNamespace>Clinical.Web</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
-    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
-    <PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
-    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
-    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageReference Include="Serilog.Sinks.Seq" Version="9.1.0" />
+    <!-- Serilog packages come transitively from Clinical.Observability (shared setup). -->
+    <ProjectReference Include="..\Clinical.Observability\Clinical.Observability.csproj" />
   </ItemGroup>
 </Project>

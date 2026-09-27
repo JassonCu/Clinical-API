@@ -21,12 +21,11 @@ public class GetAllAppointmentHandler : IRequestHandler<GetAllAppointmentQuery, 
 
         var appointments = await _appointmentRepository.GetAllAppointments(StoreProcedures.uspAppointmentList);
 
-        if (appointments is not null)
-        {
-            response.IsSuccess = true;
-            response.Data = appointments;
-            response.Message = GlobalMessage.MESSAGE_QUERY;
-        }
+
+        response.IsSuccess = true;
+        response.Data = appointments;
+        response.Message = GlobalMessage.MESSAGE_QUERY;
+
 
         return response;
     }

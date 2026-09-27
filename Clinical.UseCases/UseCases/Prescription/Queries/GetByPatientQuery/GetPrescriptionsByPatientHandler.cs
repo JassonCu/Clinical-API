@@ -20,7 +20,9 @@ namespace Clinical.UseCases.UseCases.Prescription.Queries.GetByPatientQuery
             var response = new BaseResponse<IEnumerable<GetAllPrescriptionResponseDto>>();
 
             var results = await _prescriptionRepository.GetPrescriptionsByPatient(StoreProcedures.uspPrescriptionByPatient, new { request.PatientId });
-            if (results is not null) { response.IsSuccess = true; response.Data = results; response.Message = GlobalMessage.MESSAGE_QUERY; }
+            response.IsSuccess = true;
+            response.Data = results;
+            response.Message = GlobalMessage.MESSAGE_QUERY;
 
             return response;
         }

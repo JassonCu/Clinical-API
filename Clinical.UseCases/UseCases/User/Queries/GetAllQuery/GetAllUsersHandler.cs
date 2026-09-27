@@ -21,12 +21,11 @@ namespace Clinical.UseCases.UseCases.User.Queries.GetAllQuery
 
             var users = await _userRepository.GetAllUsersAsync();
 
-            if (users is not null)
-            {
-                response.IsSuccess = true;
-                response.Data = users;
-                response.Message = GlobalMessage.MESSAGE_QUERY;
-            }
+
+            response.IsSuccess = true;
+            response.Data = users;
+            response.Message = GlobalMessage.MESSAGE_QUERY;
+
 
             return response;
         }

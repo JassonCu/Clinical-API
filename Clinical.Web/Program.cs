@@ -1,8 +1,8 @@
+using Clinical.Observability;
 using Clinical.Web.Extensions;
 using Clinical.Web.Middleware;
 using Serilog;
 using Serilog.Events;
-using Serilog.Formatting.Compact;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -13,39 +13,8 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     builder.Host.UseSerilog((context, services, loggerConfiguration) =>
-    {
-        loggerConfiguration
-            .ReadFrom.Configuration(context.Configuration)
-            .ReadFrom.Services(services)
-            .MinimumLevel.Override("Audit", LogEventLevel.Information)
-            .Enrich.FromLogContext()
-            .Enrich.WithMachineName()
-            .Enrich.WithEnvironmentName()
-            .Enrich.WithProcessId()
-            .Enrich.WithThreadId()
-            .Enrich.WithProperty("Application", "Clinical.Web");
-
-        // Console: human-readable in development, structured JSON in production (for log collectors).
-        if (context.HostingEnvironment.IsDevelopment())
-            loggerConfiguration.WriteTo.Console(
-                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext} {Message:lj} {Properties:j}{NewLine}{Exception}");
-        else
-            loggerConfiguration.WriteTo.Console(new CompactJsonFormatter());
-
-        // Rolling file, bounded so it can never fill the disk.
-        loggerConfiguration.WriteTo.File(
-            new CompactJsonFormatter(),
-            "logs/clinical-web-.log",
-            rollingInterval: RollingInterval.Day,
-            rollOnFileSizeLimit: true,
-            fileSizeLimitBytes: 50 * 1024 * 1024,
-            retainedFileCountLimit: 30);
-
-        // Centralized logging (opt-in): active only when a Seq server is configured.
-        var seqUrl = context.Configuration["Serilog:SeqUrl"];
-        if (!string.IsNullOrWhiteSpace(seqUrl))
-            loggerConfiguration.WriteTo.Seq(seqUrl, apiKey: context.Configuration["Serilog:SeqApiKey"]);
-    });
+        SerilogConfigurator.Configure(loggerConfiguration, context.Configuration, services,
+            context.HostingEnvironment.IsDevelopment(), applicationName: "Clinical.Web", logFilePrefix: "clinical-web"));
 
     builder.Services.AddControllersWithViews(options =>
     {

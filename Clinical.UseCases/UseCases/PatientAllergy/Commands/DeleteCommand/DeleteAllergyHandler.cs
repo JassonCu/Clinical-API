@@ -20,7 +20,7 @@ namespace Clinical.UseCases.UseCases.PatientAllergy.Commands.DeleteCommand
             var response = new BaseResponse<bool>();
 
             response.Data = await _unitOfWork.PatientAllergy.ExecAsync(StoreProcedures.uspAllergyRemove, new { request.AllergyId });
-            
+
             if (!response.Data)
                 throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
 

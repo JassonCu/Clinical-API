@@ -27,7 +27,7 @@ public class ChangeStateAllergyHandler : IRequestHandler<ChangeStateAllergyComma
         var entity = _mapper.Map<Entity.PatientAllergy>(request);
         var parameters = entity.GetPropertiesWithValues();
         response.Data = await _unitOfWork.PatientAllergy.ExecAsync(StoreProcedures.uspAllergyChangeState, parameters);
-        
+
         if (!response.Data)
             throw new NotFoundException(GlobalMessage.MESSAGE_QUERY_EMPTY);
 

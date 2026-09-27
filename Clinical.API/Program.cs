@@ -3,6 +3,7 @@ using Clinical.API.HealthChecks;
 using Clinical.API.Services;
 using Clinical.Infraestructure.Extensions;
 using Clinical.Interface.Interfaces;
+using Clinical.Observability;
 using Clinical.Persistence.Extensions;
 using Clinical.UseCases.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,7 +13,6 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
-using Serilog.Formatting.Compact;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
@@ -27,40 +27,8 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     builder.Host.UseSerilog((context, services, loggerConfiguration) =>
-    {
-        loggerConfiguration
-            .ReadFrom.Configuration(context.Configuration)
-            .ReadFrom.Services(services)
-            // Audit trail must never be filtered out by the environment's minimum level.
-            .MinimumLevel.Override("Audit", LogEventLevel.Information)
-            .Enrich.FromLogContext()
-            .Enrich.WithMachineName()
-            .Enrich.WithEnvironmentName()
-            .Enrich.WithProcessId()
-            .Enrich.WithThreadId()
-            .Enrich.WithProperty("Application", "Clinical.API");
-
-        // Console: human-readable in development, structured JSON in production (for log collectors).
-        if (context.HostingEnvironment.IsDevelopment())
-            loggerConfiguration.WriteTo.Console(
-                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext} {Message:lj} {Properties:j}{NewLine}{Exception}");
-        else
-            loggerConfiguration.WriteTo.Console(new CompactJsonFormatter());
-
-        // Rolling file, bounded so it can never fill the disk.
-        loggerConfiguration.WriteTo.File(
-            new CompactJsonFormatter(),
-            "logs/clinical-.log",
-            rollingInterval: RollingInterval.Day,
-            rollOnFileSizeLimit: true,
-            fileSizeLimitBytes: 50 * 1024 * 1024,
-            retainedFileCountLimit: 30);
-
-        // Centralized logging (opt-in): active only when a Seq server is configured.
-        var seqUrl = context.Configuration["Serilog:SeqUrl"];
-        if (!string.IsNullOrWhiteSpace(seqUrl))
-            loggerConfiguration.WriteTo.Seq(seqUrl, apiKey: context.Configuration["Serilog:SeqApiKey"]);
-    });
+        SerilogConfigurator.Configure(loggerConfiguration, context.Configuration, services,
+            context.HostingEnvironment.IsDevelopment(), applicationName: "Clinical.API", logFilePrefix: "clinical"));
 
     var jwtSettings = builder.Configuration.GetSection("JwtSettings");
     var secretKey = jwtSettings["SecretKey"];

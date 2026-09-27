@@ -21,12 +21,11 @@ public class GetAllExamHandler : IRequestHandler<GetAllExamQuery, BaseResponse<I
 
         var exams = await _examRepository.GetAllExam(StoreProcedures.uspExamList);
 
-        if (exams is not null)
-        {
-            response.IsSuccess = true;
-            response.Data = exams;
-            response.Message = GlobalMessage.MESSAGE_QUERY;
-        }
+
+        response.IsSuccess = true;
+        response.Data = exams;
+        response.Message = GlobalMessage.MESSAGE_QUERY;
+
 
         return response;
     }

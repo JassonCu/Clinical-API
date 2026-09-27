@@ -21,12 +21,11 @@ public class GetExamResultsByAppointmentHandler : IRequestHandler<GetExamResults
 
         var results = await _examResultRepository.GetExamResultsByAppointment(StoreProcedures.uspExamResultByAppointment, request);
 
-        if (results is not null)
-        {
-            response.IsSuccess = true;
-            response.Data = results;
-            response.Message = GlobalMessage.MESSAGE_QUERY;
-        }
+
+        response.IsSuccess = true;
+        response.Data = results;
+        response.Message = GlobalMessage.MESSAGE_QUERY;
+
 
         return response;
     }

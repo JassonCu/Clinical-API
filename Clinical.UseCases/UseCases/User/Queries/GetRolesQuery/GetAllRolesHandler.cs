@@ -21,12 +21,11 @@ namespace Clinical.UseCases.UseCases.User.Queries.GetRolesQuery
 
             var roles = await _userRepository.GetAllRolesAsync();
 
-            if (roles is not null)
-            {
-                response.IsSuccess = true;
-                response.Data = roles;
-                response.Message = GlobalMessage.MESSAGE_QUERY;
-            }
+
+            response.IsSuccess = true;
+            response.Data = roles;
+            response.Message = GlobalMessage.MESSAGE_QUERY;
+
 
             return response;
         }

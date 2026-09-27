@@ -23,7 +23,9 @@ public class GetAllMedicineHandler : IRequestHandler<GetAllMedicineQuery, BaseRe
         var response = new BaseResponse<IEnumerable<GetAllMedicineResponseDto>>();
 
         var entities = await _unitOfWork.Medicine.GetAllAsync(StoreProcedures.uspMedicineList);
-        if (entities is not null) { response.IsSuccess = true; response.Data = _mapper.Map<IEnumerable<GetAllMedicineResponseDto>>(entities); response.Message = GlobalMessage.MESSAGE_QUERY; }
+        response.IsSuccess = true;
+        response.Data = _mapper.Map<IEnumerable<GetAllMedicineResponseDto>>(entities);
+        response.Message = GlobalMessage.MESSAGE_QUERY;
 
         return response;
     }
