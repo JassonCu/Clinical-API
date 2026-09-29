@@ -88,13 +88,19 @@ try
 
     builder.Services.AddRateLimiter(options =>
     {
-        options.AddFixedWindowLimiter("auth", opt =>
-        {
-            opt.PermitLimit = 5;
-            opt.Window = TimeSpan.FromMinutes(1);
-            opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-            opt.QueueLimit = 0;
-        });
+        // Per-IP fixed window for the sensitive auth endpoints. This was a single global limiter,
+        // which throttled the whole app's logins together and could not safely include the frequent
+        // refresh-token calls; partitioning by IP is the correct anti-brute-force behavior.
+        // (Account lockout is the primary per-account defense; this is a coarse per-IP backstop.)
+        options.AddPolicy("auth", httpContext =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 10,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0
+                }));
         options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
             RateLimitPartition.GetFixedWindowLimiter(
                 ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",

@@ -46,6 +46,16 @@ public class PrescriptionController : BaseController
         return View(model);
     }
 
+    // Called by the Create page (fetch) to warn about allergy conflicts before saving.
+    // Read-only proxy to the API; safe to exempt from antiforgery.
+    [HttpPost]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> CheckAllergies([FromBody] CheckAllergiesRequestDto request)
+    {
+        var result = await _service.CheckAllergiesAsync(request.PatientId, request.MedicineIds);
+        return Json(result ?? new AllergyCheckResultDto());
+    }
+
     [HttpPost]
     public async Task<IActionResult> Delete(int id)
     {

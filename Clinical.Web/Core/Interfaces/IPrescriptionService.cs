@@ -11,4 +11,5 @@ public interface IPrescriptionService
     Task<bool> CreateAsync(CreatePrescriptionDto dto);
     Task<bool> DeleteAsync(int id);
     Task<bool> ChangeStateAsync(ChangeStatePrescriptionDto dto);
+    Task<AllergyCheckResultDto?> CheckAllergiesAsync(int patientId, IEnumerable<int> medicineIds);
 }

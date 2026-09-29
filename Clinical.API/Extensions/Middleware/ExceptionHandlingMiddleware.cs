@@ -35,36 +35,43 @@ namespace Clinical.API.Extensions.Middleware
             {
                 await _next.Invoke(context);
             }
-            catch (ValidationExceptions ex)
-            {
-                await WriteValidationAsync(context, ex);
-            }
-            catch (NotFoundException ex)
-            {
-                await WriteAsync(context, HttpStatusCode.NotFound, "Recurso no encontrado", ex.Message);
-            }
-            catch (ConflictException ex)
-            {
-                await WriteAsync(context, HttpStatusCode.Conflict, "Conflicto", ex.Message);
-            }
-            catch (ForbiddenException ex)
-            {
-                await WriteAsync(context, HttpStatusCode.Forbidden, "Acceso denegado", ex.Message);
-            }
-            catch (BusinessRuleException ex)
-            {
-                await WriteAsync(context, HttpStatusCode.UnprocessableEntity, "Regla de negocio no cumplida", ex.Message);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                _logger.LogWarning(ex, "Unauthorized access attempt.");
-                await WriteAsync(context, HttpStatusCode.Unauthorized, "No autorizado", "No autorizado.");
-            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unhandled exception.");
-                await WriteAsync(context, HttpStatusCode.InternalServerError, "Error interno",
-                    "Ocurrió un error inesperado. Contacte al administrador.");
+                // If the response already started, we can't write a clean error body without
+                // corrupting it — log and rethrow so the original failure isn't masked.
+                if (context.Response.HasStarted)
+                {
+                    _logger.LogError(ex, "The response has already started; cannot write an error response.");
+                    throw;
+                }
+
+                switch (ex)
+                {
+                    case ValidationExceptions validation:
+                        await WriteValidationAsync(context, validation);
+                        break;
+                    case NotFoundException:
+                        await WriteAsync(context, HttpStatusCode.NotFound, "Recurso no encontrado", ex.Message);
+                        break;
+                    case ConflictException:
+                        await WriteAsync(context, HttpStatusCode.Conflict, "Conflicto", ex.Message);
+                        break;
+                    case ForbiddenException:
+                        await WriteAsync(context, HttpStatusCode.Forbidden, "Acceso denegado", ex.Message);
+                        break;
+                    case BusinessRuleException:
+                        await WriteAsync(context, HttpStatusCode.UnprocessableEntity, "Regla de negocio no cumplida", ex.Message);
+                        break;
+                    case UnauthorizedAccessException:
+                        _logger.LogWarning(ex, "Unauthorized access attempt.");
+                        await WriteAsync(context, HttpStatusCode.Unauthorized, "No autorizado", "No autorizado.");
+                        break;
+                    default:
+                        _logger.LogError(ex, "Unhandled exception.");
+                        await WriteAsync(context, HttpStatusCode.InternalServerError, "Error interno",
+                            "Ocurrió un error inesperado. Contacte al administrador.");
+                        break;
+                }
             }
         }
 

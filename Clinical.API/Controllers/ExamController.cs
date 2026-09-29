@@ -8,60 +8,59 @@ using Clinical.UseCases.UseCases.Exam.Queries.GetByIdQuery;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Clinical.API.Controllers
+namespace Clinical.API.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+[Authorize]
+public class ExamController : ApiControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    [Authorize]
-    public class ExamController : ApiControllerBase
+    private readonly IMediator _mediator;
+
+    public ExamController(IMediator mediator)
     {
-        private readonly IMediator _mediator;
+        _mediator = mediator;
+    }
 
-        public ExamController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+    [HttpGet]
+    public async Task<IActionResult> ListExams()
+    {
+        var response = await _mediator.Send(new GetAllExamQuery());
+        return DataResult(response);
+    }
 
-        [HttpGet]
-        public async Task<IActionResult> ListExams()
-        {
-            var response = await _mediator.Send(new GetAllExamQuery());
-            return DataResult(response);
-        }
+    [HttpGet("{examId:int}")]
+    public async Task<IActionResult> ExamById(int examId)
+    {
+        var response = await _mediator.Send(new GetExamByIdQuery() { ExamId = examId });
+        return DataResult(response);
+    }
 
-        [HttpGet("{examId:int}")]
-        public async Task<IActionResult> ExamById(int examId)
-        {
-            var response = await _mediator.Send(new GetExamByIdQuery() { ExamId = examId });
-            return DataResult(response);
-        }
+    [HttpPost("Register")]
+    public async Task<IActionResult> RegisterExam([FromBody] CreateExamCommand command)
+    {
+        var response = await _mediator.Send(command);
+        return CommandResult(response, StatusCodes.Status201Created);
+    }
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> RegisterExam([FromBody] CreateExamCommand command)
-        {
-            var response = await _mediator.Send(command);
-            return CommandResult(response, StatusCodes.Status201Created);
-        }
+    [HttpPut("Edit")]
+    public async Task<IActionResult> EditExam([FromBody] UpdateExamCommand command)
+    {
+        var response = await _mediator.Send(command);
+        return CommandResult(response, StatusCodes.Status204NoContent);
+    }
 
-        [HttpPut("Edit")]
-        public async Task<IActionResult> EditExam([FromBody] UpdateExamCommand command)
-        {
-            var response = await _mediator.Send(command);
-            return CommandResult(response, StatusCodes.Status204NoContent);
-        }
+    [HttpDelete("Remove/{examId:int}")]
+    public async Task<IActionResult> RemoveExam(int examId)
+    {
+        var response = await _mediator.Send(new DeleteExamCommand() { ExamId = examId });
+        return CommandResult(response, StatusCodes.Status204NoContent);
+    }
 
-        [HttpDelete("Remove/{examId:int}")]
-        public async Task<IActionResult> RemoveExam(int examId)
-        {
-            var response = await _mediator.Send(new DeleteExamCommand() { ExamId = examId });
-            return CommandResult(response, StatusCodes.Status204NoContent);
-        }
-
-        [HttpPatch("ChangeState")]
-        public async Task<IActionResult> ChangeState([FromBody] ChangeStateExamCommand command)
-        {
-            var response = await _mediator.Send(command);
-            return CommandResult(response, StatusCodes.Status204NoContent);
-        }
+    [HttpPatch("ChangeState")]
+    public async Task<IActionResult> ChangeState([FromBody] ChangeStateExamCommand command)
+    {
+        var response = await _mediator.Send(command);
+        return CommandResult(response, StatusCodes.Status204NoContent);
     }
 }

@@ -8,60 +8,59 @@ using Clinical.UseCases.UseCases.Patient.Queries.GetByIdQuery;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Clinical.API.Controllers
+namespace Clinical.API.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+[Authorize]
+public class PatientController : ApiControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    [Authorize]
-    public class PatientController : ApiControllerBase
+    private readonly IMediator _mediator;
+
+    public PatientController(IMediator mediator)
     {
-        private readonly IMediator _mediator;
+        _mediator = mediator;
+    }
 
-        public PatientController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+    [HttpGet]
+    public async Task<IActionResult> ListPatients()
+    {
+        var response = await _mediator.Send(new GetAllPatientQuery());
+        return DataResult(response);
+    }
 
-        [HttpGet]
-        public async Task<IActionResult> ListPatients()
-        {
-            var response = await _mediator.Send(new GetAllPatientQuery());
-            return DataResult(response);
-        }
+    [HttpGet("{patientId:int}")]
+    public async Task<IActionResult> GetPatientById(int patientId)
+    {
+        var response = await _mediator.Send(new GetPatientByIdQuery() { PatientId = patientId });
+        return DataResult(response);
+    }
 
-        [HttpGet("{patientId:int}")]
-        public async Task<IActionResult> GetPatientById(int patientId)
-        {
-            var response = await _mediator.Send(new GetPatientByIdQuery() { PatientId = patientId });
-            return DataResult(response);
-        }
+    [HttpPost("Register")]
+    public async Task<IActionResult> RegisterPatient([FromBody] CreatePatientCommand command)
+    {
+        var response = await _mediator.Send(command);
+        return CommandResult(response, StatusCodes.Status201Created);
+    }
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> RegisterPatient([FromBody] CreatePatientCommand command)
-        {
-            var response = await _mediator.Send(command);
-            return CommandResult(response, StatusCodes.Status201Created);
-        }
+    [HttpPut("Edit")]
+    public async Task<IActionResult> EditPatient([FromBody] UpdatePatientCommand command)
+    {
+        var response = await _mediator.Send(command);
+        return CommandResult(response, StatusCodes.Status204NoContent);
+    }
 
-        [HttpPut("Edit")]
-        public async Task<IActionResult> EditPatient([FromBody] UpdatePatientCommand command)
-        {
-            var response = await _mediator.Send(command);
-            return CommandResult(response, StatusCodes.Status204NoContent);
-        }
+    [HttpDelete("Remove/{patientId:int}")]
+    public async Task<IActionResult> RemovePatient(int patientId)
+    {
+        var response = await _mediator.Send(new DeletePatientCommand() { PatientId = patientId });
+        return CommandResult(response, StatusCodes.Status204NoContent);
+    }
 
-        [HttpDelete("Remove/{patientId:int}")]
-        public async Task<IActionResult> RemovePatient(int patientId)
-        {
-            var response = await _mediator.Send(new DeletePatientCommand() { PatientId = patientId });
-            return CommandResult(response, StatusCodes.Status204NoContent);
-        }
-
-        [HttpPatch("ChangeState")]
-        public async Task<IActionResult> ChangeState([FromBody] ChangeStatePatientCommand command)
-        {
-            var response = await _mediator.Send(command);
-            return CommandResult(response, StatusCodes.Status204NoContent);
-        }
+    [HttpPatch("ChangeState")]
+    public async Task<IActionResult> ChangeState([FromBody] ChangeStatePatientCommand command)
+    {
+        var response = await _mediator.Send(command);
+        return CommandResult(response, StatusCodes.Status204NoContent);
     }
 }

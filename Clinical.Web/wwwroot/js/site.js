@@ -68,7 +68,67 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    /* ─── Prescription: allergy check before saving ─── */
+    const rxForm = document.getElementById('prescription-form');
+    if (rxForm) {
+        rxForm.addEventListener('submit', async e => {
+            // A prior check already warned/confirmed → let this submit through.
+            if (rxForm.dataset.allergyChecked === 'true') return;
+
+            const patientId = parseInt(rxForm.querySelector('[name="PatientId"]')?.value, 10);
+            const medicineIds = Array.from(rxForm.querySelectorAll('select[name$=".MedicineId"]'))
+                .map(s => parseInt(s.value, 10))
+                .filter(v => Number.isInteger(v) && v > 0);
+
+            // Nothing to check → normal submit.
+            if (!Number.isInteger(patientId) || medicineIds.length === 0) return;
+
+            e.preventDefault();
+
+            let result = null;
+            try {
+                const resp = await fetch(rxForm.dataset.checkUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ patientId, medicineIds })
+                });
+                if (resp.ok) result = await resp.json();
+            } catch { /* on failure, don't block saving */ }
+
+            if (result && result.hasConflicts) {
+                renderAllergyWarning(document.getElementById('allergy-warning'), result.conflicts);
+                rxForm.dataset.allergyChecked = 'true'; // next click is an explicit "save anyway"
+                const btn = rxForm.querySelector('button[type="submit"]');
+                if (btn) btn.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Guardar de todas formas';
+            } else {
+                rxForm.dataset.allergyChecked = 'true';
+                rxForm.requestSubmit();
+            }
+        });
+    }
+
 });
+
+function renderAllergyWarning(box, conflicts) {
+    if (!box) return;
+    const items = (conflicts || []).map(c =>
+        `<li><strong>${escapeHtml(c.medicineName)}</strong> — alergia registrada a <strong>${escapeHtml(c.allergenName)}</strong>` +
+        (c.severity ? ` (severidad: ${escapeHtml(c.severity)})` : '') +
+        (c.reaction ? ` · reacción: ${escapeHtml(c.reaction)}` : '') +
+        `</li>`).join('');
+    box.innerHTML =
+        `<div class="alert alert-danger">
+           <div class="fw-bold mb-1"><i class="bi bi-exclamation-octagon me-2"></i>Alerta de alergias</div>
+           <p class="small mb-2">El paciente tiene alergias que coinciden con medicamentos de esta receta. Revisá antes de continuar.</p>
+           <ul class="small mb-0">${items}</ul>
+         </div>`;
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
 
 /* ─── Prescription detail: agregar fila ─── */
 window.addPrescriptionRow = function (medicines) {

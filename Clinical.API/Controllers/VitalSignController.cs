@@ -6,47 +6,46 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Clinical.API.Controllers
+namespace Clinical.API.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+[Authorize]
+public class VitalSignController : ApiControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    [Authorize]
-    public class VitalSignController : ApiControllerBase
+    private readonly IMediator _mediator;
+
+    public VitalSignController(IMediator mediator)
     {
-        private readonly IMediator _mediator;
+        _mediator = mediator;
+    }
 
-        public VitalSignController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+    [HttpGet]
+    public async Task<IActionResult> List()
+    {
+        var response = await _mediator.Send(new GetAllVitalSignQuery());
+        return DataResult(response);
+    }
 
-        [HttpGet]
-        public async Task<IActionResult> List()
-        {
-            var response = await _mediator.Send(new GetAllVitalSignQuery());
-            return DataResult(response);
-        }
+    [HttpGet("ByPatient/{patientId:int}")]
+    public async Task<IActionResult> GetByPatient(int patientId)
+    {
+        var response = await _mediator.Send(new GetVitalSignsByPatientQuery { PatientId = patientId });
+        return DataResult(response);
+    }
 
-        [HttpGet("ByPatient/{patientId:int}")]
-        public async Task<IActionResult> GetByPatient(int patientId)
-        {
-            var response = await _mediator.Send(new GetVitalSignsByPatientQuery { PatientId = patientId });
-            return DataResult(response);
-        }
+    [HttpPost("Register")]
+    public async Task<IActionResult> Register([FromBody] CreateVitalSignCommand command)
+    {
+        var response = await _mediator.Send(command);
+        return CommandResult(response, StatusCodes.Status201Created);
+    }
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> Register([FromBody] CreateVitalSignCommand command)
-        {
-            var response = await _mediator.Send(command);
-            return CommandResult(response, StatusCodes.Status201Created);
-        }
-
-        [HttpDelete("Remove/{vitalSignId:int}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Remove(int vitalSignId)
-        {
-            var response = await _mediator.Send(new DeleteVitalSignCommand { VitalSignId = vitalSignId });
-            return CommandResult(response, StatusCodes.Status204NoContent);
-        }
+    [HttpDelete("Remove/{vitalSignId:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Remove(int vitalSignId)
+    {
+        var response = await _mediator.Send(new DeleteVitalSignCommand { VitalSignId = vitalSignId });
+        return CommandResult(response, StatusCodes.Status204NoContent);
     }
 }

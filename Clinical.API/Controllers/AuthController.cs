@@ -32,6 +32,7 @@ public class AuthController : ApiControllerBase
         => CommandResult(await _mediator.Send(command), StatusCodes.Status201Created);
 
     [HttpPost("RefreshToken")]
+    [EnableRateLimiting("auth")]
     [AllowAnonymous]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
         => PayloadResult(await _mediator.Send(command), StatusCodes.Status401Unauthorized);
@@ -43,6 +44,7 @@ public class AuthController : ApiControllerBase
         => CommandResult(await _mediator.Send(command), StatusCodes.Status200OK);
 
     [HttpPost("change-password")]
+    [EnableRateLimiting("auth")]
     [Authorize]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
     {

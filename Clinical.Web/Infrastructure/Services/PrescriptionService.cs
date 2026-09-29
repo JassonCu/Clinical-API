@@ -23,4 +23,12 @@ public class PrescriptionService : BaseApiService, IPrescriptionService
     public async Task<bool> CreateAsync(CreatePrescriptionDto dto) { var (ok, _) = await PostAsync("/api/prescription/Register", dto); return ok; }
     public async Task<bool> DeleteAsync(int id) { var (ok, _) = await DeleteAsync($"/api/prescription/Remove/{id}"); return ok; }
     public async Task<bool> ChangeStateAsync(ChangeStatePrescriptionDto dto) { var (ok, _) = await PatchAsync("/api/prescription/ChangeState", dto); return ok; }
+
+    public async Task<AllergyCheckResultDto?> CheckAllergiesAsync(int patientId, IEnumerable<int> medicineIds)
+    {
+        var (success, data, _) = await PostWithResultAsync<object, AllergyCheckResultDto>(
+            "/api/prescription/check-allergies",
+            new { patientId, medicineIds });
+        return success ? data : null;
+    }
 }

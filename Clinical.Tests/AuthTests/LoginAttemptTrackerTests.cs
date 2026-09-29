@@ -53,5 +53,18 @@ namespace Clinical.Test.AuthTests
             tracker.RegisterFailure("alice");
             Assert.True(tracker.IsLockedOut("ALICE"));
         }
+
+        [Fact]
+        public async Task RegisterFailure_UnderConcurrency_StillLocksOut()
+        {
+            var tracker = Build(maxAttempts: 5);
+
+            var tasks = System.Linq.Enumerable.Range(0, 50)
+                .Select(_ => Task.Run(() => tracker.RegisterFailure("carol")));
+            await Task.WhenAll(tasks);
+
+            // Concurrent failures must not be lost to a read-modify-write race.
+            Assert.True(tracker.IsLockedOut("carol"));
+        }
     }
 }

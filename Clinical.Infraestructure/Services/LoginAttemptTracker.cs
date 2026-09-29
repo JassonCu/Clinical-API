@@ -16,6 +16,10 @@ namespace Clinical.Infraestructure.Services
         private readonly int _maxAttempts;
         private readonly TimeSpan _window;
         private readonly TimeSpan _lockout;
+        // Serializes the read-modify-write below so concurrent failures can't undercount the
+        // attempts (which would let a parallel brute-force exceed the limit). Login volume is low,
+        // so contention is negligible.
+        private readonly object _sync = new();
 
         public LoginAttemptTracker(IMemoryCache cache, IConfiguration configuration)
         {
@@ -33,17 +37,20 @@ namespace Clinical.Infraestructure.Services
 
         public void RegisterFailure(string username)
         {
-            var key = FailKey(username);
-            var count = _cache.TryGetValue<int>(key, out var current) ? current + 1 : 1;
+            lock (_sync)
+            {
+                var key = FailKey(username);
+                var count = _cache.TryGetValue<int>(key, out var current) ? current + 1 : 1;
 
-            if (count >= _maxAttempts)
-            {
-                _cache.Set(LockKey(username), true, _lockout);
-                _cache.Remove(key);
-            }
-            else
-            {
-                _cache.Set(key, count, _window);
+                if (count >= _maxAttempts)
+                {
+                    _cache.Set(LockKey(username), true, _lockout);
+                    _cache.Remove(key);
+                }
+                else
+                {
+                    _cache.Set(key, count, _window);
+                }
             }
         }
 

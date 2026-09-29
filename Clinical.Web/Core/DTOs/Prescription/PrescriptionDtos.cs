@@ -69,3 +69,24 @@ public class ChangeStatePrescriptionDto
     public int PrescriptionId { get; set; }
     public int State { get; set; }
 }
+
+public class CheckAllergiesRequestDto
+{
+    public int PatientId { get; set; }
+    public List<int> MedicineIds { get; set; } = [];
+}
+
+public class AllergyCheckResultDto
+{
+    public bool HasConflicts { get; set; }
+    public List<AllergyConflictItemDto> Conflicts { get; set; } = [];
+}
+
+public class AllergyConflictItemDto
+{
+    public int MedicineId { get; set; }
+    public string MedicineName { get; set; } = string.Empty;
+    public string AllergenName { get; set; } = string.Empty;
+    public string? Severity { get; set; }
+    public string? Reaction { get; set; }
+}

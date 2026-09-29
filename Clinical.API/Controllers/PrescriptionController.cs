@@ -1,6 +1,7 @@
 using Clinical.UseCases.UseCases.Prescription.Commands.ChangeStateCommand;
 using Clinical.UseCases.UseCases.Prescription.Commands.CreateCommand;
 using Clinical.UseCases.UseCases.Prescription.Commands.DeleteCommand;
+using Clinical.UseCases.UseCases.Prescription.Queries.CheckAllergiesQuery;
 using Clinical.UseCases.UseCases.Prescription.Queries.GetAllQuery;
 using Clinical.UseCases.UseCases.Prescription.Queries.GetByDoctorQuery;
 using Clinical.UseCases.UseCases.Prescription.Queries.GetByIdQuery;
@@ -48,6 +49,14 @@ namespace Clinical.API.Controllers
         public async Task<IActionResult> GetByDoctor(int doctorId)
         {
             var response = await _mediator.Send(new GetPrescriptionsByDoctorQuery { DoctorId = doctorId });
+            return DataResult(response);
+        }
+
+        /// <summary>Checks the selected medicines against the patient's allergies before prescribing.</summary>
+        [HttpPost("check-allergies")]
+        public async Task<IActionResult> CheckAllergies([FromBody] CheckPrescriptionAllergiesQuery query)
+        {
+            var response = await _mediator.Send(query);
             return DataResult(response);
         }
 
