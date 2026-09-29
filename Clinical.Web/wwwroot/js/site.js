@@ -98,6 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result && result.hasConflicts) {
                 renderAllergyWarning(document.getElementById('allergy-warning'), result.conflicts);
                 rxForm.dataset.allergyChecked = 'true'; // next click is an explicit "save anyway"
+                // Acknowledge so the server-side enforcement lets the confirmed prescription through.
+                const ack = rxForm.querySelector('[name="AcknowledgeAllergyWarning"]');
+                if (ack) ack.value = 'true';
                 const btn = rxForm.querySelector('button[type="submit"]');
                 if (btn) btn.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Guardar de todas formas';
             } else {

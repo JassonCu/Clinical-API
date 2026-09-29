@@ -110,6 +110,7 @@ namespace Clinical.Utils.Constants
         public const string uspPrescriptionByPatient = "uspPrescriptionByPatient";
         public const string uspPrescriptionByDoctor = "uspPrescriptionByDoctor";
         public const string uspPrescriptionRegister = "uspPrescriptionRegister";
+        public const string uspPrescriptionDetailRegister = "uspPrescriptionDetailRegister";
         public const string uspPrescriptionRemove = "uspPrescriptionRemove";
         public const string uspPrescriptionChangeState = "uspPrescriptionChangeState";
         #endregion

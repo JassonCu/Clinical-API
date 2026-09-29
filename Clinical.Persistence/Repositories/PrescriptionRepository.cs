@@ -1,7 +1,9 @@
 using System.Data;
 using Clinical.Application.DTOS.Prescription.Response;
+using Clinical.Domain.Entities;
 using Clinical.Interface.Interfaces;
 using Clinical.Persistence.Context;
+using Clinical.Utils.Constants;
 using Dapper;
 
 namespace Clinical.Persistence.Repositories
@@ -63,6 +65,54 @@ namespace Clinical.Persistence.Repositories
             var objParam = new DynamicParameters(parameter);
             return await connection.QueryAsync<GetAllPrescriptionResponseDto>(
                 storedProcedure, param: objParam, commandType: CommandType.StoredProcedure);
+        }
+
+        public async Task<int> CreateWithDetailsAsync(Prescription prescription, IEnumerable<PrescriptionDetail> details)
+        {
+            using var connection = _context.CreateConnection;
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+            try
+            {
+                var prescriptionId = await connection.ExecuteScalarAsync<int>(
+                    StoreProcedures.uspPrescriptionRegister,
+                    new
+                    {
+                        prescription.PatientId,
+                        prescription.DoctorId,
+                        prescription.AppointmentId,
+                        prescription.PrescriptionDate,
+                        prescription.ValidUntil,
+                        prescription.Notes,
+                        State = 1
+                    },
+                    transaction, commandType: CommandType.StoredProcedure);
+
+                foreach (var detail in details)
+                {
+                    await connection.ExecuteAsync(
+                        StoreProcedures.uspPrescriptionDetailRegister,
+                        new
+                        {
+                            PrescriptionId = prescriptionId,
+                            detail.MedicineId,
+                            detail.Quantity,
+                            detail.Dosage,
+                            detail.Frequency,
+                            detail.Duration,
+                            detail.Instructions
+                        },
+                        transaction, commandType: CommandType.StoredProcedure);
+                }
+
+                transaction.Commit();
+                return prescriptionId;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
     }
 }

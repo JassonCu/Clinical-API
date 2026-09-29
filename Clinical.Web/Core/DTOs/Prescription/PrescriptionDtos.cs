@@ -52,6 +52,9 @@ public class CreatePrescriptionDto
     [Display(Name = "Válida hasta")] public DateTime? ValidUntil { get; set; }
     [Display(Name = "Notas")] public string? Notes { get; set; }
     public List<CreatePrescriptionDetailDto> Details { get; set; } = [];
+
+    /// <summary>Set by the UI when the prescriber confirms despite an allergy warning.</summary>
+    public bool AcknowledgeAllergyWarning { get; set; }
 }
 
 public class CreatePrescriptionDetailDto

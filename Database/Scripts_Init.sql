@@ -914,6 +914,18 @@ AS
 BEGIN
     INSERT INTO Prescription (PatientId, DoctorId, AppointmentId, PrescriptionDate, ValidUntil, Notes, State)
     VALUES (@PatientId, @DoctorId, @AppointmentId, @PrescriptionDate, @ValidUntil, @Notes, @State);
+
+    SELECT CAST(SCOPE_IDENTITY() AS INT);
+END
+GO
+
+CREATE OR ALTER PROCEDURE uspPrescriptionDetailRegister
+    @PrescriptionId INT, @MedicineId INT, @Quantity INT,
+    @Dosage NVARCHAR(100), @Frequency NVARCHAR(100), @Duration NVARCHAR(100), @Instructions NVARCHAR(500)
+AS
+BEGIN
+    INSERT INTO PrescriptionDetail (PrescriptionId, MedicineId, Quantity, Dosage, Frequency, Duration, Instructions, State)
+    VALUES (@PrescriptionId, @MedicineId, @Quantity, @Dosage, @Frequency, @Duration, @Instructions, 1);
 END
 GO
 

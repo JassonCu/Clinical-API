@@ -1,4 +1,6 @@
-﻿using Clinical.UseCases.Commons.Behaviours;
+﻿using Clinical.Interface.Interfaces;
+using Clinical.UseCases.Commons.Behaviours;
+using Clinical.UseCases.Services;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +18,7 @@ public static class InyectionExtensions
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviours<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuditBehaviour<,>));
+        services.AddScoped<IPrescriptionAllergyService, PrescriptionAllergyService>();
         return services;
     }
 }
