@@ -38,8 +38,9 @@ public class AppointmentController : BaseController
     public async Task<IActionResult> Create(CreateAppointmentDto model)
     {
         if (!ModelState.IsValid) { await PopulateDropdowns(); return View(model); }
-        if (await _service.CreateAsync(model)) { SetSuccess("Cita registrada."); return RedirectToAction(nameof(Index)); }
-        SetError("No se pudo registrar la cita.");
+        var (ok, error) = await _service.CreateAsync(model);
+        if (ok) { SetSuccess("Cita registrada."); return RedirectToAction(nameof(Index)); }
+        SetError(error ?? "No se pudo registrar la cita.");
         await PopulateDropdowns();
         return View(model);
     }
@@ -62,8 +63,9 @@ public class AppointmentController : BaseController
     public async Task<IActionResult> Edit(UpdateAppointmentDto model)
     {
         if (!ModelState.IsValid) { await PopulateDropdowns(); return View(model); }
-        if (await _service.UpdateAsync(model)) { SetSuccess("Cita actualizada."); return RedirectToAction(nameof(Index)); }
-        SetError("No se pudo actualizar.");
+        var (ok, error) = await _service.UpdateAsync(model);
+        if (ok) { SetSuccess("Cita actualizada."); return RedirectToAction(nameof(Index)); }
+        SetError(error ?? "No se pudo actualizar.");
         await PopulateDropdowns();
         return View(model);
     }

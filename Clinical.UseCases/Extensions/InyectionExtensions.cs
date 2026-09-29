@@ -19,6 +19,7 @@ public static class InyectionExtensions
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviours<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuditBehaviour<,>));
         services.AddScoped<IPrescriptionAllergyService, PrescriptionAllergyService>();
+        services.AddScoped<IAppointmentConflictChecker, AppointmentConflictChecker>();
         return services;
     }
 }

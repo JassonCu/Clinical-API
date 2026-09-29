@@ -20,8 +20,8 @@ public class AppointmentService : BaseApiService, IAppointmentService
     public Task<IEnumerable<AppointmentListDto>> GetByDoctorAsync(int doctorId) =>
         GetAsync<IEnumerable<AppointmentListDto>>($"/api/appointment/ByDoctor/{doctorId}").ContinueWith(t => t.Result ?? []);
 
-    public async Task<bool> CreateAsync(CreateAppointmentDto dto) { var (ok, _) = await PostAsync("/api/appointment/Register", dto); return ok; }
-    public async Task<bool> UpdateAsync(UpdateAppointmentDto dto) { var (ok, _) = await PutAsync("/api/appointment/Edit", dto); return ok; }
+    public Task<(bool Success, string? Error)> CreateAsync(CreateAppointmentDto dto) => PostAsync("/api/appointment/Register", dto);
+    public Task<(bool Success, string? Error)> UpdateAsync(UpdateAppointmentDto dto) => PutAsync("/api/appointment/Edit", dto);
     public async Task<bool> DeleteAsync(int id) { var (ok, _) = await DeleteAsync($"/api/appointment/Remove/{id}"); return ok; }
     public async Task<bool> ChangeStateAsync(ChangeStateAppointmentDto dto) { var (ok, _) = await PatchAsync("/api/appointment/ChangeState", dto); return ok; }
 }
