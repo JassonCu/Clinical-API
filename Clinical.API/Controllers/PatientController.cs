@@ -5,6 +5,7 @@ using Clinical.UseCases.UseCases.Patient.Commands.DeleteCommand;
 using Clinical.UseCases.UseCases.Patient.Commands.UpdateCommand;
 using Clinical.UseCases.UseCases.Patient.Queries.GetAllQuery;
 using Clinical.UseCases.UseCases.Patient.Queries.GetByIdQuery;
+using Clinical.UseCases.UseCases.Patient.Queries.GetSummaryQuery;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,6 +34,13 @@ public class PatientController : ApiControllerBase
     public async Task<IActionResult> GetPatientById(int patientId)
     {
         var response = await _mediator.Send(new GetPatientByIdQuery() { PatientId = patientId });
+        return DataResult(response);
+    }
+
+    [HttpGet("{patientId:int}/summary")]
+    public async Task<IActionResult> GetPatientSummary(int patientId)
+    {
+        var response = await _mediator.Send(new GetPatientSummaryQuery() { PatientId = patientId });
         return DataResult(response);
     }
 

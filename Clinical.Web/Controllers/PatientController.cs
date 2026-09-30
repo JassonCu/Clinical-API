@@ -20,6 +20,13 @@ public class PatientController : BaseController
         return View(item);
     }
 
+    public async Task<IActionResult> Summary(int id)
+    {
+        var summary = await _service.GetSummaryAsync(id);
+        if (summary is null) return NotFound();
+        return View(summary);
+    }
+
     [HttpGet]
     public IActionResult Create() => View(new CreatePatientDto());
 

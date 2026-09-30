@@ -14,6 +14,9 @@ public class PatientService : BaseApiService, IPatientService
     public Task<PatientDetailDto?> GetByIdAsync(int id) =>
         GetAsync<PatientDetailDto>($"/api/patient/{id}");
 
+    public Task<PatientSummaryDto?> GetSummaryAsync(int id) =>
+        GetAsync<PatientSummaryDto>($"/api/patient/{id}/summary");
+
     public async Task<bool> CreateAsync(CreatePatientDto dto)
     {
         var (ok, _) = await PostAsync("/api/patient/Register", dto);

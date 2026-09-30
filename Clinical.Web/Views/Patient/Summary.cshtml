@@ -1,0 +1,224 @@
+@model Clinical.Web.Core.DTOs.Patient.PatientSummaryDto
+@{
+    ViewData["Title"] = "Ficha Clínica 360°";
+
+    string SeverityClass(string? s) => (s ?? "").ToLowerInvariant() switch
+    {
+        var x when x.Contains("alta") || x.Contains("sever") || x.Contains("grave") => "bg-danger",
+        var x when x.Contains("media") || x.Contains("moder") => "bg-warning text-dark",
+        var x when x.Contains("baja") || x.Contains("leve") => "bg-secondary",
+        _ => "bg-secondary"
+    };
+    string Dash(string? v) => string.IsNullOrWhiteSpace(v) ? "–" : v;
+}
+
+<div class="mb-3 d-flex gap-2 flex-wrap">
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Volver</a>
+    <a asp-action="Details" asp-route-id="@Model.Patient.PatientId" class="btn btn-sm btn-outline-primary"><i class="bi bi-person-lines-fill me-1"></i>Detalle</a>
+    <a asp-controller="Appointment" asp-action="Create" class="btn btn-sm btn-outline-info"><i class="bi bi-calendar-plus me-1"></i>Nueva cita</a>
+    <a asp-controller="Prescription" asp-action="Create" class="btn btn-sm btn-outline-success"><i class="bi bi-capsule me-1"></i>Nueva receta</a>
+</div>
+
+<!-- Cabecera del paciente -->
+<div class="form-card mb-3">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div class="entity-avatar">@Model.Patient.FullName.FirstOrDefault()</div>
+        <div class="flex-grow-1">
+            <h4 class="mb-1 fw-bold">@Model.Patient.FullName</h4>
+            <div class="d-flex gap-3 flex-wrap text-muted small">
+                <span><i class="bi bi-card-text me-1"></i>@Dash(Model.Patient.DocumentNumber)</span>
+                @if (Model.Patient.Age.HasValue) { <span><i class="bi bi-cake2 me-1"></i>@Model.Patient.Age años</span> }
+                <span><i class="bi bi-gender-ambiguous me-1"></i>@Dash(Model.Patient.Gender)</span>
+                @if (!string.IsNullOrWhiteSpace(Model.Patient.BloodType)) { <span class="badge bg-danger-subtle text-danger-emphasis"><i class="bi bi-droplet-half me-1"></i>@Model.Patient.BloodType</span> }
+                <span><i class="bi bi-telephone me-1"></i>@Dash(Model.Patient.Phone)</span>
+                <span><i class="bi bi-shield-plus me-1"></i>@Dash(Model.Patient.InsuranceCompany)</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KPIs -->
+<div class="row g-3 mb-3">
+    @{
+        void Kpi(string label, int value, string icon, string color) {
+            <div class="col-6 col-md-3">
+                <div class="form-card h-100 text-center">
+                    <i class="bi @icon fs-3 @color"></i>
+                    <div class="fs-3 fw-bold">@value</div>
+                    <div class="text-muted small text-uppercase ls-tight">@label</div>
+                </div>
+            </div>
+        }
+    }
+    @{ Kpi("Alergias activas", Model.Counts.ActiveAllergies, "bi-exclamation-triangle", "text-warning"); }
+    @{ Kpi("Diagnósticos", Model.Counts.ActiveDiagnoses, "bi-clipboard2-pulse", "text-info"); }
+    @{ Kpi("Citas totales", Model.Counts.TotalAppointments, "bi-calendar-check", "text-primary"); }
+    @{ Kpi("Recetas totales", Model.Counts.TotalPrescriptions, "bi-capsule", "text-success"); }
+</div>
+
+<div class="row g-3">
+    <!-- Alergias (seguridad primero) -->
+    <div class="col-lg-6">
+        <div class="form-card h-100">
+            <h6 class="fw-bold text-uppercase text-muted mb-3"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>Alergias activas</h6>
+            @if (Model.ActiveAllergies.Count == 0)
+            {
+                <p class="text-muted mb-0">Sin alergias registradas.</p>
+            }
+            else
+            {
+                <ul class="list-unstyled mb-0">
+                    @foreach (var a in Model.ActiveAllergies)
+                    {
+                        <li class="d-flex justify-content-between align-items-center border-bottom py-2">
+                            <div>
+                                <span class="fw-semibold">@a.AllergenName</span>
+                                @if (!string.IsNullOrWhiteSpace(a.AllergenType)) { <span class="text-muted small">· @a.AllergenType</span> }
+                                @if (!string.IsNullOrWhiteSpace(a.Reaction)) { <div class="text-muted small">@a.Reaction</div> }
+                            </div>
+                            <span class="badge @SeverityClass(a.Severity)">@Dash(a.Severity)</span>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+
+    <!-- Diagnósticos -->
+    <div class="col-lg-6">
+        <div class="form-card h-100">
+            <h6 class="fw-bold text-uppercase text-muted mb-3"><i class="bi bi-clipboard2-pulse text-info me-1"></i>Diagnósticos</h6>
+            @if (Model.Diagnoses.Count == 0)
+            {
+                <p class="text-muted mb-0">Sin diagnósticos registrados.</p>
+            }
+            else
+            {
+                <ul class="list-unstyled mb-0">
+                    @foreach (var d in Model.Diagnoses.Take(6))
+                    {
+                        <li class="border-bottom py-2">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-semibold">@Dash(d.Description)</span>
+                                <span class="text-muted small">@(d.Date?.ToString("dd/MM/yyyy"))</span>
+                            </div>
+                            <div class="text-muted small">
+                                @if (!string.IsNullOrWhiteSpace(d.IcdCode)) { <span class="badge bg-light text-dark border me-1">@d.IcdCode</span> }
+                                @d.DiagnosisType
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+
+    <!-- Próximas citas -->
+    <div class="col-lg-6">
+        <div class="form-card h-100">
+            <h6 class="fw-bold text-uppercase text-muted mb-3"><i class="bi bi-calendar-event text-primary me-1"></i>Próximas citas</h6>
+            @if (Model.UpcomingAppointments.Count == 0)
+            {
+                <p class="text-muted mb-0">Sin citas próximas.</p>
+            }
+            else
+            {
+                <ul class="list-unstyled mb-0">
+                    @foreach (var c in Model.UpcomingAppointments)
+                    {
+                        <li class="d-flex justify-content-between align-items-center border-bottom py-2">
+                            <span>@Dash(c.Reason)</span>
+                            <span class="badge bg-primary-subtle text-primary-emphasis">@(c.AppointmentDate?.ToString("dd/MM/yyyy HH:mm"))</span>
+                        </li>
+                    }
+                </ul>
+            }
+            @if (Model.LastAppointment is not null)
+            {
+                <div class="text-muted small mt-2"><i class="bi bi-clock-history me-1"></i>Última: @Model.LastAppointment.AppointmentDate?.ToString("dd/MM/yyyy") — @Dash(Model.LastAppointment.Reason)</div>
+            }
+        </div>
+    </div>
+
+    <!-- Recetas recientes -->
+    <div class="col-lg-6">
+        <div class="form-card h-100">
+            <h6 class="fw-bold text-uppercase text-muted mb-3"><i class="bi bi-capsule text-success me-1"></i>Recetas recientes</h6>
+            @if (Model.RecentPrescriptions.Count == 0)
+            {
+                <p class="text-muted mb-0">Sin recetas registradas.</p>
+            }
+            else
+            {
+                <ul class="list-unstyled mb-0">
+                    @foreach (var p in Model.RecentPrescriptions)
+                    {
+                        <li class="d-flex justify-content-between align-items-center border-bottom py-2">
+                            <div>
+                                <span class="fw-semibold">#@p.PrescriptionId</span>
+                                <span class="text-muted small">· @(p.PrescriptionDate?.ToString("dd/MM/yyyy"))</span>
+                                @if (!string.IsNullOrWhiteSpace(p.Notes)) { <div class="text-muted small">@p.Notes</div> }
+                            </div>
+                            <span class="badge @(p.IsActive ? "bg-success" : "bg-secondary")">@(p.IsActive ? "Vigente" : "Vencida")</span>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+
+    <!-- Últimos signos vitales -->
+    <div class="col-lg-6">
+        <div class="form-card h-100">
+            <h6 class="fw-bold text-uppercase text-muted mb-3"><i class="bi bi-heart-pulse text-danger me-1"></i>Últimos signos vitales</h6>
+            @if (Model.LatestVitalSign is null)
+            {
+                <p class="text-muted mb-0">Sin mediciones registradas.</p>
+            }
+            else
+            {
+                var v = Model.LatestVitalSign;
+                <div class="row g-2">
+                    @{
+                        void Vital(string label, string? value) {
+                            <div class="col-4">
+                                <div class="text-muted small text-uppercase ls-tight">@label</div>
+                                <div class="fw-semibold">@Dash(value)</div>
+                            </div>
+                        }
+                    }
+                    @{ Vital("Peso", v.Weight?.ToString("0.#") + " kg"); }
+                    @{ Vital("Talla", v.Height?.ToString("0.#") + " cm"); }
+                    @{ Vital("IMC", v.Bmi?.ToString("0.#")); }
+                    @{ Vital("Presión", v.BloodPressureSystolic.HasValue ? $"{v.BloodPressureSystolic}/{v.BloodPressureDiastolic}" : null); }
+                    @{ Vital("FC", v.HeartRate?.ToString() + " lpm"); }
+                    @{ Vital("Temp", v.Temperature?.ToString("0.#") + " °C"); }
+                    @{ Vital("SpO₂", v.OxygenSaturation?.ToString() + " %"); }
+                </div>
+                <div class="text-muted small mt-2"><i class="bi bi-clock me-1"></i>@(v.MeasuredAt?.ToString("dd/MM/yyyy HH:mm"))</div>
+            }
+        </div>
+    </div>
+
+    <!-- Antecedentes -->
+    <div class="col-lg-6">
+        <div class="form-card h-100">
+            <h6 class="fw-bold text-uppercase text-muted mb-3"><i class="bi bi-journal-medical text-secondary me-1"></i>Antecedentes</h6>
+            @if (Model.MedicalHistory is null)
+            {
+                <p class="text-muted mb-0">Sin historial clínico registrado.</p>
+            }
+            else
+            {
+                var h = Model.MedicalHistory;
+                <dl class="row mb-0 small">
+                    <dt class="col-5 text-muted">Enf. crónicas</dt><dd class="col-7">@Dash(h.ChronicDiseases)</dd>
+                    <dt class="col-5 text-muted">Cirugías previas</dt><dd class="col-7">@Dash(h.PreviousSurgeries)</dd>
+                    <dt class="col-5 text-muted">Medicación actual</dt><dd class="col-7">@Dash(h.CurrentMedications)</dd>
+                    <dt class="col-5 text-muted">Antec. familiares</dt><dd class="col-7">@Dash(h.FamilyHistory)</dd>
+                    <dt class="col-5 text-muted">Hábitos</dt><dd class="col-7">@Dash(h.Habits)</dd>
+                </dl>
+            }
+        </div>
+    </div>
+</div>
