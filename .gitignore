@@ -401,3 +401,5 @@ FodyWeavers.xsd
 # Local environment secrets
 .env
 .env.local
+# Config local de desarrollo (contiene credenciales locales; no versionar)
+Clinical.API/appsettings.Development.json

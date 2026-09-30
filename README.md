@@ -16,9 +16,12 @@ Sistema de gestión clínica compuesto por dos proyectos:
 - [Correr en local](#correr-en-local)
   - [Requisitos previos](#requisitos-previos)
   - [1. Clonar el repositorio](#1-clonar-el-repositorio)
-  - [2. Base de datos](#2-base-de-datos)
-  - [3. Iniciar la API](#3-iniciar-la-api)
-  - [4. Iniciar el Frontend](#4-iniciar-el-frontend)
+  - [2. Levantar SQL Server en Docker](#2-levantar-sql-server-en-docker)
+  - [3. Crear el esquema — orden de ejecución de scripts](#3-crear-el-esquema--orden-de-ejecución-de-scripts)
+  - [4. Configurar la cadena de conexión](#4-configurar-la-cadena-de-conexión)
+  - [5. Iniciar la API](#5-iniciar-la-api)
+  - [6. Crear el primer usuario Admin](#6-crear-el-primer-usuario-admin)
+  - [7. Iniciar el Frontend](#7-iniciar-el-frontend)
 - [Correr con Docker](#correr-con-docker)
 - [Configuración](#configuración)
 - [Seguridad](#seguridad)
@@ -127,17 +130,17 @@ Clinical.Web/
 
 ## Correr en Local
 
+> Guía end-to-end para levantar el sistema en una máquina nueva usando **SQL Server en Docker**. Es el camino recomendado y el que usa el equipo. Si preferís una instancia nativa de SQL Server/SQLEXPRESS, sólo cambia el paso 2 y el `Server=...` de la cadena de conexión.
+
 ### Requisitos Previos
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- SQL Server 2019+ o SQL Server Express (instancia `SQLEXPRESS`)
-- Git
+| Herramienta | Uso | Verificar |
+|---|---|---|
+| [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) | Compilar y correr API + Web | `dotnet --version` → `10.x.x` |
+| [Docker Desktop](https://www.docker.com/products/docker-desktop/) | SQL Server en contenedor | `docker --version` |
+| Git | Clonar el repo | `git --version` |
 
-Verificar instalación:
-
-```bash
-dotnet --version   # debe mostrar 10.x.x
-```
+> `sqlcmd` **no** es necesario en el host: los scripts se ejecutan **dentro** del contenedor con `docker exec`. Si preferís, podés usar Azure Data Studio / SSMS conectándote a `localhost,1433`.
 
 ---
 
@@ -150,55 +153,114 @@ cd Clinical-API
 
 ---
 
-### 2. Base de Datos
+### 2. Levantar SQL Server en Docker
 
-#### Crear la base de datos
-
-```sql
-CREATE DATABASE Clinical;
-```
-
-#### Ejecutar los scripts en orden
+Crea el contenedor **una sola vez**. Elegí tu propia contraseña fuerte para `sa` (mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo) y **recordala** para el paso 4.
 
 ```bash
-# Script 1 — Módulos base (Patient, Doctor, Appointment, Exam, Analysis, ExamResult)
-sqlcmd -S localhost\SQLEXPRESS -d Clinical -i Database/Scripts_StoredProcedures.sql
-
-# Script 2 — Módulos nuevos (Auth, MedicalHistory, VitalSign, Medicine, Prescription, Allergy, Diagnosis)
-sqlcmd -S localhost\SQLEXPRESS -d Clinical -i Database/Scripts_NewModules.sql
+docker run -d \
+  --name clinical_sql \
+  -e "ACCEPT_EULA=Y" \
+  -e "MSSQL_SA_PASSWORD=TuPassword_Fuerte123" \
+  -e "MSSQL_PID=Developer" \
+  -p 1433:1433 \
+  mcr.microsoft.com/mssql/server:2022-latest
 ```
 
-> El Script 2 también siembra la tabla `Role` con los roles por defecto: `Admin`, `Doctor`, `Nurse`, `Pharmacist`, `Receptionist`.
+Verificá que quedó arriba y que el puerto está mapeado:
 
-#### Crear el primer usuario Admin
-
-Genera un hash BCrypt de tu contraseña e insértalo directamente en la tabla `[User]`:
-
-```sql
--- Ejemplo con hash de "Admin123!" (reemplaza el hash por uno generado con BCrypt work factor 12)
-INSERT INTO [User] (Username, Email, PasswordHash, FirstName, LastName, RoleId, State, AuditCreateDate)
-VALUES ('admin', 'admin@clinical.com', '$2a$12$TU_HASH_AQUI', 'Admin', 'Sistema', 1, 1, GETUTCDATE());
+```bash
+docker ps --filter "name=clinical_sql" --format "{{.Names}} | {{.Status}} | {{.Ports}}"
+# clinical_sql | Up ... | 0.0.0.0:1433->1433/tcp
 ```
 
-> Puedes generar el hash en [bcrypt-generator.com](https://bcrypt-generator.com/) con cost factor 12, o desde código C# con `BCrypt.Net.BCrypt.HashPassword("Admin123!", 12)`.
+> Si el contenedor ya existe y está detenido: `docker start clinical_sql`.
+> Windows: si `\` de multilínea da problemas en PowerShell, poné todo el `docker run` en una sola línea.
 
 ---
 
-### 3. Iniciar la API
+### 3. Crear el Esquema — Orden de Ejecución de Scripts
 
-#### Configurar `Clinical.API/appsettings.Development.json`
+Los scripts SQL están en la carpeta [`Database/`](Database/). **Hay dos caminos:**
+
+#### ✅ Camino recomendado (instalación nueva): un solo script
+
+[`Scripts_Init.sql`](Database/Scripts_Init.sql) es el **script maestro consolidado e idempotente**: crea la base `Clinical`, las **16 tablas**, los **96 stored procedures** y siembra los roles. Incluye todo lo de los scripts incrementales (auth, fix de estados, detalles de receta). Es seguro correrlo varias veces (`CREATE OR ALTER` + `IF NOT EXISTS`).
+
+```bash
+# Copiar el script al contenedor y ejecutarlo
+docker cp Database/Scripts_Init.sql clinical_sql:/tmp/Scripts_Init.sql
+docker exec clinical_sql /opt/mssql-tools18/bin/sqlcmd \
+  -S localhost -U sa -P "TuPassword_Fuerte123" -C \
+  -i /tmp/Scripts_Init.sql
+```
+
+> Con esto la base queda **100% lista**. Saltá al paso 4.
+> Nota: en imágenes viejas la ruta de sqlcmd es `/opt/mssql-tools/bin/sqlcmd` (sin el `18`).
+
+#### 🔧 Camino incremental (referencia / actualizar una base antigua)
+
+Sólo si necesitás aplicar los cambios uno por uno sobre una base preexistente. **El orden importa** (cada script depende de objetos creados por el anterior):
+
+| # | Script | Crea / Modifica | Depende de |
+|---|--------|-----------------|------------|
+| 1 | `Scripts_StoredProcedures.sql` | Tablas base: `Patient`, `Doctor`, `Appointment`, `Analysis`, `Exam`, `ExamResult` (+31 SPs) | — |
+| 2 | `Scripts_NewModules.sql` | `Role`, `User`, `MedicalHistory`, `VitalSign`, `Medicine`, `Prescription`, `PrescriptionDetail`, `PatientAllergy`, `PatientDiagnosis` (+50 SPs) + siembra roles | 1 |
+| 3 | `Scripts_Setup_Auth.sql` | Columna `MustChangePassword`, tabla `PasswordResetToken` + SPs de reseteo/setup | 2 (altera `[User]`) |
+| 4 | `Scripts_Fix_State.sql` | Agrega `@State` a SPs de registro + crea `uspAnalysisRegister` / `uspExamRegister` | 1, 2 |
+| 5 | `Scripts_Prescription_Details.sql` | `uspPrescriptionRegister` (devuelve `SCOPE_IDENTITY`) + `uspPrescriptionDetailRegister` — *Feature: detalles de receta* | 2 |
+| 6 | `Scripts_Encryption_TDE.sql` | **Opcional / sólo producción.** Cifrado en reposo (TDE). Lo ejecuta un DBA. | Base creada |
+
+```bash
+# Ejemplo aplicando el orden incremental dentro del contenedor
+for f in Scripts_StoredProcedures Scripts_NewModules Scripts_Setup_Auth Scripts_Fix_State Scripts_Prescription_Details; do
+  docker cp "Database/$f.sql" clinical_sql:/tmp/$f.sql
+  docker exec clinical_sql /opt/mssql-tools18/bin/sqlcmd \
+    -S localhost -U sa -P "TuPassword_Fuerte123" -C -d Clinical -i /tmp/$f.sql
+done
+```
+
+> Los roles sembrados por defecto son: `Admin`, `Doctor`, `Nurse`, `Pharmacist`, `Receptionist`.
+> `Scripts_Encryption_TDE.sql` **no** se aplica en local (requiere edición Enterprise/Standard 2019+ y gestión de certificados).
+
+Comprobá que quedó todo:
+
+```bash
+docker exec clinical_sql /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "TuPassword_Fuerte123" -C -d Clinical \
+  -Q "SELECT CONCAT('Tablas=', (SELECT COUNT(*) FROM sys.tables), '  SPs=', (SELECT COUNT(*) FROM sys.procedures));"
+# Esperado: Tablas=16  SPs=96
+```
+
+---
+
+### 4. Configurar la Cadena de Conexión
+
+Poné la cadena de conexión en **`Clinical.API/appsettings.Development.json`**. Este archivo **está en `.gitignore`** (no se versiona), justamente porque contiene la contraseña del `sa`. Como se lee desde la carpeta del proyecto, funciona en cualquier terminal sin depender del perfil de usuario de Windows.
+
+Si el archivo no existe en tu copia (recién clonada), crealo con este contenido:
 
 ```json
 {
+  "Logging": {
+    "LogLevel": { "Default": "Information", "Microsoft.AspNetCore": "Warning" }
+  },
   "ConnectionStrings": {
-    "ClinicalConnection": "Server=localhost\\SQLEXPRESS;Database=Clinical;Integrated Security=true;TrustServerCertificate=true"
+    "ClinicalConnection": "Server=localhost,1433;Database=Clinical;User Id=sa;Password=TuPassword_Fuerte123;TrustServerCertificate=true;Encrypt=false"
+  },
+  "JwtSettings": {
+    "SecretKey": "DEV-ONLY-LocalDevelopmentSigningKey-DoNotUseInProduction-0123456789"
   }
 }
 ```
 
-> La clave JWT y el resto de settings ya están en `appsettings.json`. En producción sobreescríbelos con variables de entorno.
+> Reemplazá `TuPassword_Fuerte123` por la **misma** contraseña del paso 2.
+> La API **falla al arrancar** con un mensaje claro si no encuentra la cadena (`ConnectionStrings:ClinicalConnection`) — es intencional (fail-fast).
+> **Alternativa** sin tocar el archivo: exportar la variable de entorno `ConnectionStrings__ClinicalConnection` con el mismo valor (útil en CI o si preferís no tener credenciales en disco).
+> En **producción** la cadena y la clave JWT vienen siempre de variables de entorno, nunca de archivos versionados.
 
-#### Correr
+---
+
+### 5. Iniciar la API
 
 ```bash
 dotnet run --project Clinical.API
@@ -213,7 +275,29 @@ La API queda disponible en:
 | Health check | `http://localhost:5123/health` |
 | OpenAPI JSON | `http://localhost:5123/openapi/v1.json` |
 
-#### Probar el login
+---
+
+### 6. Crear el Primer Usuario Admin
+
+En una base recién creada **no hay usuarios**. La API expone un endpoint de setup para crear el primer administrador (sólo funciona si aún no hay usuarios).
+
+```bash
+# ¿Ya está inicializado el sistema?
+curl http://localhost:5123/api/setup/status
+
+# Crear el primer admin
+curl -X POST http://localhost:5123/api/setup/init \
+  -H "Content-Type: application/json" \
+  -d '{
+        "username": "admin",
+        "email": "admin@clinical.com",
+        "password": "Admin123!",
+        "firstName": "Admin",
+        "lastName": "Sistema"
+      }'
+```
+
+Probá el login:
 
 ```bash
 curl -X POST http://localhost:5123/api/auth/Login \
@@ -221,24 +305,27 @@ curl -X POST http://localhost:5123/api/auth/Login \
   -d '{"username":"admin","password":"Admin123!"}'
 ```
 
-Respuesta esperada:
+Respuesta esperada (200):
 
 ```json
 {
   "accessToken": "eyJhbGci...",
   "refreshToken": "base64...",
-  "expiresAt": "2025-06-05T14:00:00Z",
   "username": "admin",
   "fullName": "Admin Sistema",
-  "role": "Admin"
+  "role": "Admin",
+  "mustChangePassword": false
 }
 ```
 
+> Un **401** con `"El usuario y/o contraseña es incorrecta"` significa que la conexión a la BD funciona pero las credenciales no coinciden.
+> Un **500** con `SqlException ... error 26` significa que la API no llega al contenedor: revisá que `clinical_sql` esté arriba y que la cadena del paso 4 (`appsettings.Development.json`) tenga la contraseña correcta.
+
 ---
 
-### 4. Iniciar el Frontend
+### 7. Iniciar el Frontend
 
-#### Configurar `Clinical.Web/appsettings.Development.json`
+Config ya presente en `Clinical.Web/appsettings.Development.json`:
 
 ```json
 {
@@ -248,19 +335,13 @@ Respuesta esperada:
 }
 ```
 
-#### Correr (en una segunda terminal)
+En una **segunda terminal** (la API debe estar corriendo):
 
 ```bash
 dotnet run --project Clinical.Web
 ```
 
-El frontend queda disponible en:
-
-```
-http://localhost:5124
-```
-
-Inicia sesión con el usuario Admin creado en el paso 2. El sistema redirige automáticamente al dashboard.
+El frontend queda disponible en `http://localhost:5124`. Iniciá sesión con el usuario Admin del paso 6; el sistema redirige al dashboard.
 
 > **Nota:** La API debe estar corriendo antes de iniciar el frontend.
 
